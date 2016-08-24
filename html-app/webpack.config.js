@@ -21,6 +21,7 @@ module.exports = {
     },
 
     plugins: [
+        require('webpack-fail-plugin'),
         // Remove 3rd patry from app and tests bundles
         new webpack.optimize.CommonsChunkPlugin({ name: 'thirdparty', chunks: ['app'] }),
         //new webpack.optimize.CommonsChunkPlugin({ name: 'thirdparty', chunks: ['tests'] }),
