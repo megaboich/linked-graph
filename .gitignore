@@ -1,1 +1,4 @@
 target/
+html-app/node_modules/
+html-app/typings/
+public/js/

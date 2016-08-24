@@ -1,0 +1,8 @@
+; Top-most EditorConfig file
+; What is EditorConfig? EditorConfig helps developers define and maintain consistent coding styles between different editors and IDEs.
+; for more details see http://editorconfig.org/
+; This settings are applied by EditorConfig VisualStudio Extension https://visualstudiogallery.msdn.microsoft.com/c8bccfe2-650c-4b42-bc5c-845e21f96328
+root = true
+
+[*]
+indent_style = space

@@ -1,0 +1,35 @@
+{
+  "name": "empty-react-app",
+  "version": "1.0.0",
+  "description": "Empty React App",
+  "main": "main.tsx",
+  "dependencies": {
+    "react": "^15.3.0",
+    "react-addons-test-utils": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "react-router": "^2.6.1"
+  },
+  "devDependencies": {
+    "file-loader": "^0.9.0",
+    "sass-loader": "^3.2.0",
+    "style-loader": "^0.13.1",
+    "ts-loader": "^0.8.2",
+    "typescript": "^1.8.10",
+    "url-loader": "^0.5.7",
+    "webpack": "^1.13.0",
+    "node-sass": "^3.7.0",
+    "jasmine-core": "^2.4.1",
+    "css-loader": "^0.23.1",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "tslint": "^3.13.0",
+    "tslint-loader": "^2.1.5"
+  },
+  "scripts": {
+    "build": "webpack",
+    "build:w": "webpack --watch",
+    "typings": "typings",
+    "postinstall": "typings install --global"
+  },
+  "author": "Oleksandr Boiko",
+  "license": "ISC"
+}
