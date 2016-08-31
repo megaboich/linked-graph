@@ -1,6 +1,7 @@
 {
     "globalDependencies": {
         "jasmine": "registry:dt/jasmine#2.2.0+20160621224255",
+        "knockout": "registry:dt/knockout#0.0.0+20160512130947",
         "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160829180742",
         "whatwg-streams": "registry:dt/whatwg-streams#0.0.0+20160829180742"
     }

@@ -1,3 +1,6 @@
+/*
+This is custom stub definition for d3
+*/
 declare namespace d3 {
     var select: any;
     var scaleOrdinal: any;

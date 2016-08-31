@@ -10,17 +10,16 @@
 
 <body>
     <div id="main-container" class="columns is-fullheight is-gapless">
-        <div class="column is-9">
+        <div class="column">
             <svg width="100%" height="700"></svg>
         </div>
-        <div class="column is-3">
-            <p class="control has-addons">
-                <input class="input" type="text" placeholder="New node name">
-                <a class="button is-info">
-                    Add
-                </a>
-            </p>
-
+        <div class="column is-narrow">
+            <div id="side-panel" class="box">
+                <p class="control has-addons">
+                    <input class="input" type="text" placeholder="New node name" data-bind="value: newNodeName">
+                    <a class="button is-info" data-bind="click: addChild" >Add</a>
+                </p>
+            </div>
         </div>
     </div>
 

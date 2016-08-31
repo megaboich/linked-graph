@@ -4,7 +4,8 @@ module.exports = {
     entry: {
         thirdparty: [
             'd3',
-            'bulma'
+            'bulma',
+            'knockout'
         ],
         app: './app/main.ts',
         //tests: './app/tests.js'
