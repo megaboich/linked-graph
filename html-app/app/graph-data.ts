@@ -3,6 +3,8 @@ import {Triple} from './triple'
 export interface GraphNode {
     id: string;
     group: number;
+    x?: number;
+    y?: number;
 }
 
 export interface GraphLink {
@@ -13,8 +15,8 @@ export interface GraphLink {
 }
 
 export class GraphData {
-    nodes: GraphNode[];
-    links: GraphLink[];
+    nodes: GraphNode[] = [];
+    links: GraphLink[] = [];
 }
 
 export class GraphDataBuilder {
