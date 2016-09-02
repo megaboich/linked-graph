@@ -13,4 +13,8 @@ export class SidePanelViewModel {
         this.newNodeSubject.next(this.newNodeName());
         this.newNodeName("");
     }
+
+    bindToDom(domElementId: string) {
+        ko.applyBindings(this, document.getElementById('domElementId'));
+    }
 }

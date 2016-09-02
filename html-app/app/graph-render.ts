@@ -2,8 +2,12 @@
 import {GraphData, GraphLink, GraphNode} from './graph-data'
 import '../styles/graph.css'
 
+import { Subject } from 'rxjs/Subject';
+
 export class GraphRender {
     updateGraph: () => void;
+
+    selectedNodeSubject = new Subject<GraphNode>();
 
     constructor(graph: GraphData) {
         const nodeRadiusX = 50;
@@ -33,6 +37,15 @@ export class GraphRender {
             .on("drag", dragged)
             .on("end", dragended);
 
+        let click = (node, index) => {
+            this.selectedNodeSubject.next(node);
+        };
+
+        this.selectedNodeSubject.subscribe(node => {
+            graph.nodes.forEach(n => n.selected = false);
+            node.selected = true;
+        })
+
         this.updateGraph = function update() {
 
             link = svg.selectAll(".link")
@@ -59,15 +72,16 @@ export class GraphRender {
 
             let nodeEnter = node.enter().append("g")
                 .attr("class", "node")
-                //.on("click", click)
+                .on("click", click)
                 .call(drag);
 
             nodeEnter.append("ellipse")
+                .attr("class", "nodeEllipse")
                 .attr("rx", function (d) { return nodeRadiusX; })
-                .attr("ry", function (d) { return nodeRadiusY; })
-                .style("fill", function (d) { return "#ffffff" });
+                .attr("ry", function (d) { return nodeRadiusY; });
 
             nodeEnter.append("text")
+                .attr("class", "nodeText")
                 .attr("dy", ".3em")
                 .style("text-anchor", "middle")
                 .text(d => d.id);
@@ -82,6 +96,8 @@ export class GraphRender {
 
             simulation.force("link")
                 .links(graph.links);
+
+            simulation.restart();
         }
 
         function ticked() {
@@ -94,6 +110,14 @@ export class GraphRender {
                 .attr("y", function (d) { return d.target.y + (d.source.y - d.target.y) / 2; })
 
             node.attr("transform", d => `translate(${d.x},${d.y})`);
+            node.attr("class", d => {
+                if (d.selected) {
+                    return "node selected";
+                }
+                else {
+                    return "node";
+                }
+            });
         }
 
         function dragstarted(d) {

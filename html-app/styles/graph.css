@@ -7,4 +7,21 @@ line {
 .node ellipse {
     stroke: #999;
     stroke-width: 1px;
+    cursor: pointer;
+    fill: #ffffff;
+}
+
+.node.selected ellipse {
+    stroke: #555;
+    stroke-width: 1.5px;
+    cursor: pointer;
+    fill: #cce6ff;
+}
+
+.node .nodeText{
+    cursor: pointer;
+}
+
+.node.selected .nodeText{
+    font-weight: bold;
 }

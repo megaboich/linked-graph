@@ -5,6 +5,7 @@ export interface GraphNode {
     group: number;
     x?: number;
     y?: number;
+    selected?: boolean;
 }
 
 export interface GraphLink {
