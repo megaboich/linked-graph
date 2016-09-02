@@ -1,35 +1,33 @@
 ﻿import 'bulma'
 import '../styles/main.css'
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 
 import {DataLoader} from './data-loader'
 import {GraphDataBuilder, GraphData, GraphNode} from './graph-data'
+import {ApplicationState} from './app-state'
+
 import {GraphRender} from './graph-render'
+import {ControlPanelComponent, IControlPanelProps} from './control-panel'
 
-import * as ko from "knockout";
-import {SidePanelViewModel} from './side-panel'
+let appState = new ApplicationState();
 
-let graph = new GraphData();
-let render = new GraphRender(graph);
+let render = new GraphRender(appState.graph, appState.selectedNodeSubject);
 
-let sidePanelModel = new SidePanelViewModel();
-sidePanelModel.bindToDom('#side-panel');
-sidePanelModel.newNodeSubject.subscribe(name => {
-    let newNode: GraphNode = { id: name, group: 1, x: 300, y: 300, selected: true };
-    graph.nodes.push(newNode);
+appState.graphUpdatedSubject.subscribe(() => {
     render.updateGraph();
+})
 
-    render.selectedNodeSubject.next(newNode);
-});
-
-render.selectedNodeSubject.subscribe(node => {
-    console.log('Ho Ho ', node);
-});
+let controlPanelProps: IControlPanelProps = {
+    appState: appState
+};
+ReactDOM.render(
+    React.createElement(ControlPanelComponent, controlPanelProps),
+    document.getElementById('cp-holder')
+);
 
 let dataLoader = new DataLoader();
 dataLoader.LoadData().then(triples => {
-    let newData = GraphDataBuilder.BuildGraphData(triples);
-    newData.nodes.forEach(n => graph.nodes.push(n));
-    newData.links.forEach(l => graph.links.push(l));
-    render.updateGraph();
+    appState.appendTriplesToGraph(triples);
 });
 

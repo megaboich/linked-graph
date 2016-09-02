@@ -5,7 +5,8 @@ module.exports = {
         thirdparty: [
             'd3',
             'bulma',
-            'knockout'
+            'react',
+            'react-dom'
         ],
         app: './app/main.ts',
         //tests: './app/tests.js'

@@ -1,18 +1,19 @@
 ﻿import * as d3 from 'd3'
-import {GraphData, GraphLink, GraphNode} from './graph-data'
+import { Subject } from 'rxjs/Subject';
 import '../styles/graph.css'
 
-import { Subject } from 'rxjs/Subject';
+import {GraphData, GraphLink, GraphNode} from './graph-data'
+
+const nodeRadiusX = 50;
+const nodeRadiusY = 25;
+const linkLength = 150;
 
 export class GraphRender {
     updateGraph: () => void;
+    selectedNodeSubject: Subject<GraphNode>;
 
-    selectedNodeSubject = new Subject<GraphNode>();
-
-    constructor(graph: GraphData) {
-        const nodeRadiusX = 50;
-        const nodeRadiusY = 25;
-        const linkLength = 150;
+    constructor(graph: GraphData, selectedNodeSubject: Subject<GraphNode>) {
+        this.selectedNodeSubject = selectedNodeSubject;
 
         let svg = d3.select("svg"),
             width = 700,
@@ -41,10 +42,10 @@ export class GraphRender {
             this.selectedNodeSubject.next(node);
         };
 
-        this.selectedNodeSubject.subscribe(node => {
+        this.selectedNodeSubject.subscribe((node: GraphNode) => {
             graph.nodes.forEach(n => n.selected = false);
             node.selected = true;
-        })
+        });
 
         this.updateGraph = function update() {
 

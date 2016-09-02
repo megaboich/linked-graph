@@ -25,3 +25,12 @@ line {
 .node.selected .nodeText{
     font-weight: bold;
 }
+
+.link text{
+    cursor:pointer;
+    fill: #555;
+}
+
+.link text:hover{
+    fill: #000033;
+}

@@ -1,7 +1,8 @@
 {
     "globalDependencies": {
         "jasmine": "registry:dt/jasmine#2.2.0+20160621224255",
-        "knockout": "registry:dt/knockout#0.0.0+20160512130947",
+        "react": "registry:dt/react#0.14.0+20160829191040",
+        "react-dom": "registry:dt/react-dom#0.14.0+20160412154040",
         "whatwg-fetch": "registry:dt/whatwg-fetch#0.0.0+20160829180742",
         "whatwg-streams": "registry:dt/whatwg-streams#0.0.0+20160829180742"
     }
