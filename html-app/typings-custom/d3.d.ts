@@ -14,6 +14,7 @@ declare namespace d3 {
     var drag: any;
     var event: any;
     var layout: any;
+    var zoom: any;
 }
 
 declare module "d3" {

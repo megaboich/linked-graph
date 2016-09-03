@@ -16,8 +16,20 @@ export class GraphRender {
         this.selectedNodeSubject = selectedNodeSubject;
 
         let svg = d3.select("svg"),
-            width = 700,
-            height = 700;
+            width = document.documentElement.clientWidth,
+            height = document.documentElement.clientHeight;
+
+        svg.on('click', () => {
+            this.selectedNodeSubject.next(null);
+        });
+
+        svg = svg.call(d3.zoom().scaleExtent([1 / 2, 8]).on("zoom", zoomed))
+            .append("g")
+            .attr("transform", "translate(40,0)");
+
+        function zoomed() {
+            svg.attr("transform", d3.event.transform);
+        }
 
         let node,
             link,
@@ -45,18 +57,12 @@ export class GraphRender {
             this.selectedNodeSubject.next(node);
         };
 
-        let backgroundclick = () => {
-            this.selectedNodeSubject.next(null);
-        }
-
         this.selectedNodeSubject.subscribe(() => {
             // we need to force simulation to update objects
             simulation.restart();
         })
 
         this.updateGraph = function update() {
-            svg.on('click', backgroundclick);
-
             link = svg.selectAll(".link")
                 .data(simulation.force('link').links(), d => d.source.id + "->" + d.target.id);
 
