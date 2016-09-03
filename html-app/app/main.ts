@@ -8,7 +8,7 @@ import {GraphDataBuilder, GraphData, GraphNode} from './graph-data'
 import {ApplicationState} from './app-state'
 
 import {GraphRender} from './graph-render'
-import {ControlPanelComponent, IControlPanelProps} from './control-panel'
+import {ControlPanelComponent, IControlPanelProps} from './control-panel/control-panel'
 
 let appState = new ApplicationState();
 

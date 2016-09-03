@@ -1,4 +1,4 @@
-import { GraphData, GraphNode, GraphDataBuilder } from './graph-data'
+import { GraphData, GraphNode, GraphLink, GraphDataBuilder } from './graph-data'
 import { Subject } from 'rxjs/Subject';
 import { Triple } from './triple'
 
@@ -6,6 +6,16 @@ export class ApplicationState {
     graph: GraphData = new GraphData();
     graphUpdatedSubject = new Subject<GraphData>();
     selectedNodeSubject = new Subject<GraphNode>();
+    showConnectModalSubject = new Subject<boolean>();
+
+    constructor() {
+        this.selectedNodeSubject.subscribe((node: GraphNode) => {
+            this.graph.nodes.forEach(n => n.selected = false);
+            if (node) {
+                node.selected = true;
+            }
+        });
+    }
 
     updateGraph() {
         this.graphUpdatedSubject.next(this.graph);
@@ -22,10 +32,25 @@ export class ApplicationState {
         this.updateGraph();
     }
 
+    addLink(newLink: GraphLink) {
+        this.graph.links.push(newLink);
+        this.updateGraph();
+    }
+
     appendTriplesToGraph(triples: Triple[]) {
         let newData = GraphDataBuilder.BuildGraphData(triples);
         newData.nodes.forEach(n => this.graph.nodes.push(n));
         newData.links.forEach(l => this.graph.links.push(l));
         this.updateGraph();
+    }
+
+    getConnectionsForNode(node: GraphNode): GraphLink[] {
+        if (!node) {
+            return [];
+        }
+        var links = this.graph.links.filter(l => {
+            return l.source.id == node.id || l.target.id == node.id;
+        });
+        return links;
     }
 }

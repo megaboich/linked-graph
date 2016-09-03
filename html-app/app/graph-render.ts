@@ -27,10 +27,12 @@ export class GraphRender {
         let simulation = d3.forceSimulation()
             .force("link", d3.forceLink()
                 .id(function (d) { return d.id; })
+                .links(graph.links)
                 .distance(linkLength))
             .force("charge", d3.forceManyBody().strength(-80))
             .force("center", d3.forceCenter(width / 2, height / 2))
             .force("collide", d3.forceCollide(nodeRadiusX))
+            .nodes(graph.nodes)
             .on("tick", ticked);
 
         let drag = d3.drag()
@@ -39,18 +41,24 @@ export class GraphRender {
             .on("end", dragended);
 
         let click = (node, index) => {
+            d3.event.stopPropagation();
             this.selectedNodeSubject.next(node);
         };
 
-        this.selectedNodeSubject.subscribe((node: GraphNode) => {
-            graph.nodes.forEach(n => n.selected = false);
-            node.selected = true;
-        });
+        let backgroundclick = () => {
+            this.selectedNodeSubject.next(null);
+        }
+
+        this.selectedNodeSubject.subscribe(() => {
+            // we need to force simulation to update objects
+            simulation.restart();
+        })
 
         this.updateGraph = function update() {
+            svg.on('click', backgroundclick);
 
             link = svg.selectAll(".link")
-                .data(graph.links, d => d.source.id + "->" + d.target.id);
+                .data(simulation.force('link').links(), d => d.source.id + "->" + d.target.id);
 
             let linkEnter = link.enter().append("g")
                 .attr("class", "link");
@@ -67,9 +75,10 @@ export class GraphRender {
             line = svg.selectAll(".linkLine");
 
             link = linkEnter.merge(link);
+            link.exit().remove();
 
             node = svg.selectAll(".node")
-                .data(graph.nodes, function (d) { return d.id; })
+                .data(simulation.nodes(), function (d) { return d.id; })
 
             let nodeEnter = node.enter().append("g")
                 .attr("class", "node")
@@ -91,13 +100,22 @@ export class GraphRender {
                 .text(function (d) { return d.id; });
 
             node = nodeEnter.merge(node);
-
+            node.exit().remove();
+            /*
+                        svg.selectAll("g").sort((n1, n2) => {
+                            if (n1.attr("class") === "node") {
+                                return 1;
+                            }
+                            return -1;
+                        });
+            */
             simulation
                 .nodes(graph.nodes);
 
             simulation.force("link")
                 .links(graph.links);
 
+            // we need to force simulation to update objects
             simulation.restart();
         }
 

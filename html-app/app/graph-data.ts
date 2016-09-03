@@ -9,8 +9,8 @@ export interface GraphNode {
 }
 
 export interface GraphLink {
-    source: string;
-    target: string;
+    source: GraphNode;
+    target: GraphNode;
     predicate?: string;
     value: number;
 }
@@ -18,6 +18,10 @@ export interface GraphLink {
 export class GraphData {
     nodes: GraphNode[] = [];
     links: GraphLink[] = [];
+
+    getLinkKey(link: GraphLink): string {
+        return `${link.source.id}->${link.predicate}->${link.target.id}`;
+    }
 }
 
 export class GraphDataBuilder {
@@ -34,8 +38,8 @@ export class GraphDataBuilder {
 
         graph.links = triples.map(t => {
             let link: GraphLink = {
-                source: t.subject,
-                target: t.object,
+                source: graph.nodes.find(n => n.id == t.subject),
+                target: graph.nodes.find(n => n.id == t.object),
                 predicate: t.predicate,
                 value: 30
             };
