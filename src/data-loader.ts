@@ -3,9 +3,9 @@ import { Triple } from "./triple";
 export class DataLoader {
   async loadData(): Promise<Triple[]> {
     const fakeData: Triple[] = [
-      { object: "Olek", predicate: "works at", subject: "Semmtech" },
-      { object: "Olek", predicate: "lives in", subject: "Hoofddorp" },
-      { object: "Hoofddorp", predicate: "located in", subject: "Haarlemermeer" }
+      { subject: "Olek", predicate: "works at", object: "Semmtech" },
+      { subject: "Olek", predicate: "lives in", object: "Hoofddorp" },
+      { subject: "Hoofddorp", predicate: "located in", object: "Haarlemermeer" }
     ];
     return fakeData;
   }

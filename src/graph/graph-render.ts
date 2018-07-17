@@ -76,10 +76,10 @@ export class GraphRender {
     this.updateGraph = function update() {
       link = svg
         .selectAll(".link")
-        .data
-        //simulation.force("link").links(),
-        //d => d.source.id + "->" + d.target.id
-        ();
+        .data(
+          (simulation.force("link") as any).links(),
+          (d: any) => d.source.id + "->" + d.target.id
+        );
 
       let linkEnter = link
         .enter()
@@ -140,7 +140,7 @@ export class GraphRender {
 
       simulation.nodes(graph.nodes);
 
-      //simulation.force("link").links(graph.links);
+      (simulation.force("link") as any).links(graph.links);
 
       // we need to force simulation to update objects
       simulation.restart();

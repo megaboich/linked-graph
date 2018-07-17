@@ -140,7 +140,7 @@ export class ControlPanelComponent extends React.Component<
 
   getNodeLinkMarkup(node: GraphNode) {
     if (this.state.selectedNode && this.state.selectedNode.id == node.id) {
-      return <span>{node.id}</span>;
+      return <span className="has-text-weight-semibold">{node.id}</span>;
     } else {
       return (
         <a href="javascript:void(0)" onClick={() => this.selectNode(node)}>
