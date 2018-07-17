@@ -1,5 +1,2 @@
-target/
-html-app/node_modules/
-html-app/typings/
-public/js/
-html-app/node/
+node_modules/
+dist/
