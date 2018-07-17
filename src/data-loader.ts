@@ -1,16 +1,12 @@
-import {Triple} from './triple'
+import { Triple } from "./triple";
 
 export class DataLoader {
-    LoadData(): Promise<Triple[]> {
-        return new Promise(function (resolve, reject) {
-            fetch('/testdata')
-                .then(response => {
-                    return response.json()
-                }).then(json => {
-                    resolve(json as Triple[]);
-                }).catch(function (ex) {
-                    console.log('loading failed', ex)
-                })
-        });
-    }
+  async loadData(): Promise<Triple[]> {
+    const fakeData: Triple[] = [
+      { object: "Olek", predicate: "works at", subject: "Semmtech" },
+      { object: "Olek", predicate: "lives in", subject: "Hoofddorp" },
+      { object: "Hoofddorp", predicate: "located in", subject: "Haarlemermeer" }
+    ];
+    return fakeData;
+  }
 }

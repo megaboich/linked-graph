@@ -1,45 +1,83 @@
-﻿var webpack = require('webpack');
+﻿const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
+  .BundleAnalyzerPlugin;
+const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
-module.exports = {
+module.exports = function(env) {
+  env = env || {};
+  const isProduction = !!env.prod;
+  console.log("Building app bundle with webpack");
+
+  const webpackConfig = {
+    mode: isProduction ? "production" : "development",
     entry: {
-        thirdparty: [
-            'd3',
-            'bulma',
-            'react',
-            'react-dom'
-        ],
-        app: './app/main.ts',
-        //tests: './app/tests.js'
+      app: "./src/main.tsx"
+    },
+    resolve: {
+      extensions: [".ts", ".tsx", ".js"],
+      modules: [__dirname, "node_modules"]
     },
     output: {
-        filename: '../public/js/[name].js'
+      path: __dirname + "/dist",
+      filename: "[name].js",
+      pathinfo: false
     },
     // Turn on sourcemaps
-    devtool: 'source-map',
-    resolve: {
-        extensions: ['', '.ts', '.tsx', '.js']
-    },
+    devtool: "source-map",
 
     plugins: [
-        require('webpack-fail-plugin'),
-        // Remove 3rd patry from app and tests bundles
-        new webpack.optimize.CommonsChunkPlugin({ name: 'thirdparty', chunks: ['app'] }),
-        //new webpack.optimize.CommonsChunkPlugin({ name: 'thirdparty', chunks: ['tests'] }),
-
-        // Add minification
-        //new webpack.optimize.UglifyJsPlugin()
-    ],
+      new HtmlWebpackPlugin({
+        template: "src/index.html",
+        filename: "index.html"
+      }),
+      new ForkTsCheckerWebpackPlugin(),
+      isProduction &&
+        new BundleAnalyzerPlugin({
+          // Can be `server`, `static` or `disabled`.
+          // In `server` mode analyzer will start HTTP server to show bundle report.
+          // In `static` mode single HTML file with bundle report will be generated.
+          // In `disabled` mode you can use this plugin to just generate Webpack Stats JSON file by setting `generateStatsFile` to `true`.
+          analyzerMode: "static",
+          // Path to bundle report file that will be generated in `static` mode.
+          // Relative to bundles output directory.
+          reportFilename: "../reports/bundle-analyzer-app-report.html",
+          // Automatically open report in default browser
+          openAnalyzer: false,
+          // If `true`, Webpack Stats JSON file will be generated in bundles output directory
+          generateStatsFile: false,
+          // Log level. Can be 'info', 'warn', 'error' or 'silent'.
+          logLevel: "info"
+        })
+    ].filter(x => !!x),
     module: {
-        preLoaders: [
-            { test: /\.tsx?$/, loader: "tslint-loader" }
-        ],
-        loaders: [
-            { test: /\.tsx?$/, loader: "ts-loader", exclude: /node_modules/ },
-            { test: /\.css$/, loader: "style-loader!css" },
-            { test: /\.scss$/, loaders: ["style", "css", "sass"] },
-            { test: /\.sass$/, loaders: ["style", "css", "sass"] },
-            { test: /\.png$/, loader: "url-loader?limit=100000" },
-            { test: /\.gif$/, loader: "url-loader?limit=100000" }
-        ]
+      rules: [
+        {
+          test: /\.tsx?$/,
+          loader: "ts-loader",
+          options: {
+            transpileOnly: true,
+            compilerOptions: { target: "ES2017" }
+          }
+        },
+        {
+          test: /\.(png|jpg|jpeg|gif|svg)$/,
+          loader: "url-loader",
+          options: { limit: 200000 }
+        },
+        { test: /\.(html|txt)$/, loader: "raw-loader" },
+        { test: /\.css$/, use: ["style-loader", "css-loader"] },
+        {
+          test: /\.(less|scss)$/,
+          use: ["style-loader", "css-loader", "less-loader"]
+        }
+      ]
+    },
+    devServer: {
+      contentBase: "dist/",
+      port: 8091
     }
-}
+  };
+
+  return webpackConfig;
+};

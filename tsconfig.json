@@ -1,20 +1,25 @@
 ﻿{
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "sourceMap": true,
-        /*
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        */
-        "removeComments": false,
-        "noImplicitAny": false,
-        "jsx": "react"
-    },
-    "exclude": [
-        "node_modules",
-        "typings/main",
-        "typings/main.d.ts"
-    ]
+  "compilerOptions": {
+    "target": "es5",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "sourceMap": true,
+    "inlineSourceMap": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "strict": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "pretty": true,
+    "jsx": "react",
+    "types": ["node"],
+    "lib": ["dom", "es2017"],
+    "importHelpers": true
+  },
+  "exclude": ["node_modules", "dist"]
 }
