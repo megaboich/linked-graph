@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 import "../styles/graph.css";
 
 import { GraphData, GraphLink, GraphNode } from "./graph-data";
+import { ensure } from 'src/helpers/syntax';
 
 const nodeRadiusX = 50;
 const nodeRadiusY = 25;
@@ -15,8 +16,8 @@ export class GraphRender {
   constructor(graph: GraphData, selectedNodeSubject: Subject<GraphNode>) {
     this.selectedNodeSubject = selectedNodeSubject;
 
-    const width = document.documentElement.clientWidth;
-    const height = document.documentElement.clientHeight;
+    const width = ensure(document.documentElement).clientWidth;
+    const height = ensure(document.documentElement).clientHeight;
 
     const svg = d3
       .select("svg" as any)
