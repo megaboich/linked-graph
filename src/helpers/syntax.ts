@@ -20,3 +20,13 @@ export function ensure<S>(value: S | undefined | null, message?: string): S {
     throw ex;
   }
 }
+
+export type DictionaryLike<V> = { [name: string]: V | undefined };
+
+export async function stay(milliseconds: number): Promise<void> {
+  return new Promise<void>(resolve => {
+    setTimeout(function() {
+      resolve();
+    }, milliseconds);
+  });
+}

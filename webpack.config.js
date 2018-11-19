@@ -12,7 +12,7 @@ module.exports = function(env) {
   const webpackConfig = {
     mode: isProduction ? "production" : "development",
     entry: {
-      app: "./src/main.tsx"
+      app: "./src/app.tsx"
     },
     resolve: {
       extensions: [".ts", ".tsx", ".js"],
