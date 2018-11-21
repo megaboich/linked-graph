@@ -1,4 +1,4 @@
-import * as React from "react";
+import { h, Component } from "preact";
 import { GraphNode, GraphLink } from "src/graph/objects";
 import { NodeComponent } from "./node.component";
 import { LinkComponent } from "./link.component";
@@ -13,7 +13,7 @@ export interface Props {
   links: GraphLink[];
 }
 
-export class GraphComponent extends React.Component<Props, State> {
+export class GraphComponent extends Component<Props, State> {
   private layout = new GraphColaLayout(() => this.forceUpdate());
 
   constructor(props: Props) {
@@ -36,7 +36,17 @@ export class GraphComponent extends React.Component<Props, State> {
 
   componentWillUnmount() {
     this.layout.stop();
+    this.layout.clearTimer();
   }
+
+  handleNodeClick = (node: GraphNode) => {
+    console.log("Node click!", node);
+    for (const n of this.props.nodes) {
+      n.selected = false;
+    }
+    node.selected = true;
+    this.forceUpdate();
+  };
 
   render() {
     return (
@@ -49,7 +59,11 @@ export class GraphComponent extends React.Component<Props, State> {
               ))}
             </g>
             {this.props.nodes.map(node => (
-              <NodeComponent key={node.id} node={node} />
+              <NodeComponent
+                key={node.id}
+                node={node}
+                onNodeClick={this.handleNodeClick}
+              />
             ))}
           </g>
         </svg>

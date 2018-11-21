@@ -5,9 +5,10 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 module.exports = function(env) {
-  env = env || {};
-  const isProduction = !!env.prod;
+  env = env || "dev";
+  const isProduction = env == "prod";
   console.log("Building app bundle with webpack");
+  console.log("  production: " + isProduction, env);
 
   const webpackConfig = {
     mode: isProduction ? "production" : "development",

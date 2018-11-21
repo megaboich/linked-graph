@@ -1,4 +1,4 @@
-import * as React from "react";
+import { h, Component } from "preact";
 import * as cn from "classnames";
 
 interface IComponentState {
@@ -7,10 +7,10 @@ interface IComponentState {
 
 interface IComponentProps {
   brandContent?: JSX.Element;
-  children?: React.ReactNode;
+  menuContent?: JSX.Element;
 }
 
-export class NavbarComponent extends React.Component<
+export class NavbarComponent extends Component<
   IComponentProps,
   IComponentState
 > {
@@ -48,7 +48,7 @@ export class NavbarComponent extends React.Component<
             "is-active": this.state.isMenuToggled
           })}
         >
-          {this.props.children}
+          {this.props.menuContent}
         </div>
       </nav>
     );

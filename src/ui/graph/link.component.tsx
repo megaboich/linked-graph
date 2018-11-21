@@ -1,4 +1,4 @@
-import * as React from "react";
+import { h, Component } from "preact";
 import { GraphLink } from "src/graph/objects";
 
 export interface State {}
@@ -7,7 +7,7 @@ export interface Props {
   link: GraphLink;
 }
 
-export class LinkComponent extends React.Component<Props, State> {
+export class LinkComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {};

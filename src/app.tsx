@@ -1,13 +1,15 @@
-﻿import * as React from "react";
-import * as ReactDOM from "react-dom";
+﻿import { h, render } from "preact";
 
 import "bulma/css/bulma.min.css";
 import "./styles/main.css";
 
 import { MainComponent } from "./ui/main";
+import { ensure } from "./helpers/syntax";
 
 async function runApplication() {
-  ReactDOM.render(<MainComponent />, document.getElementById("app-container"));
+  const appContainer = ensure(document.getElementById("app-container"));
+  appContainer.innerHTML = "";
+  render(<MainComponent />, appContainer);
 }
 
 (window as any).runApplication = function() {

@@ -17,6 +17,7 @@
     "noImplicitThis": true,
     "pretty": true,
     "jsx": "react",
+    "jsxFactory": "h",
     "types": ["node"],
     "lib": ["dom", "es2017"],
     "importHelpers": true
