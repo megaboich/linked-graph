@@ -1,5 +1,5 @@
 import * as cola from "webcola";
-import { GraphNode, GraphLink } from "src/graph/objects";
+import { GraphNode, GraphLink } from "src/ui/graph/objects";
 
 export class GraphColaLayout extends cola.Layout {
   private timerHandle: any;
@@ -12,14 +12,18 @@ export class GraphColaLayout extends cola.Layout {
     return !!this.timerHandle;
   }
 
-  init(nodes: GraphNode[], links: GraphLink[]) {
+  init(
+    screenSize: { width: number; height: number },
+    nodes: GraphNode[],
+    links: GraphLink[]
+  ) {
     this.clearTimer();
     this.timerHandle = setInterval(this.timerTick, 100);
 
     this.nodes(nodes)
       .links(links)
       .convergenceThreshold(0.05)
-      .size([600, 400])
+      .size([screenSize.width, screenSize.height])
       .jaccardLinkLengths(50, 0.7)
       //.linkDistance(50)
       .avoidOverlaps(true)

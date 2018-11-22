@@ -1,9 +1,10 @@
 import { h, Component } from "preact";
 
 import { NavbarComponent } from "./common/navbar.component";
-import { GraphNode, GraphLink } from "src/graph/objects";
+import { GraphNode, GraphLink } from "src/ui/graph/objects";
 import { getRandomWord, getRandomNumber } from "src/helpers/random";
 import { GraphComponent } from "./graph/graph.component";
+import { getInitialGraph } from "./services/data-loader";
 
 export interface State {
   nodes: GraphNode[];
@@ -15,7 +16,7 @@ export interface Props {}
 export class MainComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { nodes: [], links: [] };
+    this.state = { ...getInitialGraph() };
   }
 
   onNewNodeClick = () => {
@@ -44,8 +45,7 @@ export class MainComponent extends Component<Props, State> {
         newNodes.find(n => !!n.selected) || newNodes[newNodes.length - 2];
       const newLink: GraphLink = {
         source: prevNode,
-        target: newNode,
-        id: prevNode.id + " - " + newNode.id
+        target: newNode
       };
       newLinks.push(newLink);
     }
@@ -110,7 +110,12 @@ export class MainComponent extends Component<Props, State> {
             </div>
           }
         />
-        <GraphComponent nodes={this.state.nodes} links={this.state.links} />
+        <GraphComponent
+          width={1000}
+          height={800}
+          nodes={this.state.nodes}
+          links={this.state.links}
+        />
       </div>
     );
   }

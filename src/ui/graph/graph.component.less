@@ -9,6 +9,20 @@
       &.is-selected {
         fill: darkcyan;
       }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    .graph-edge {
+      stroke: #ddd;
+    }
+  }
+
+  &.is-mouse-down {
+    svg {
+      cursor: move;
     }
   }
 }
