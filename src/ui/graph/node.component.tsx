@@ -6,7 +6,7 @@ export interface State {}
 
 export interface Props {
   node: GraphNode;
-  onNodeClick(node: GraphNode): void;
+  onNodeMouseDown(node: GraphNode, e: MouseEvent): void;
 }
 
 export class NodeComponent extends Component<Props, State> {
@@ -18,7 +18,7 @@ export class NodeComponent extends Component<Props, State> {
   handleMouseDown = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onNodeClick(this.props.node);
+    this.props.onNodeMouseDown(this.props.node, e);
   };
 
   render() {

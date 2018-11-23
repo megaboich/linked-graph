@@ -11,11 +11,17 @@ export interface State {
   cameraX: number;
   cameraY: number;
   cameraZoom: number;
-  cameraDragStartX: number;
-  cameraDragStartY: number;
-  mouseDragStartClientX: number;
-  mouseDragStartClientY: number;
+  dragStartCameraX?: number;
+  dragStartCameraY?: number;
+  dragStartCameraMouseX?: number;
+  dragStartCameraMouseY?: number;
   mouseDown?: boolean;
+
+  dragNode?: GraphNode;
+  dragStartNodeX?: number;
+  dragStartNodeY?: number;
+  dragStartNodeMouseX?: number;
+  dragStartNodeMouseY?: number;
 }
 
 export interface Props {
@@ -33,20 +39,18 @@ export class GraphComponent extends Component<Props, State> {
     this.state = {
       cameraX: props.width / 2,
       cameraY: props.height / 2,
-      cameraZoom: 1,
-      cameraDragStartX: 0,
-      cameraDragStartY: 0,
-      mouseDragStartClientX: 0,
-      mouseDragStartClientY: 0
+      cameraZoom: 1
     };
   }
 
   componentDidMount() {
-    this.layout.init(
-      { width: this.props.width, height: this.props.height },
-      this.props.nodes,
-      this.props.links
-    );
+    this.layout.init({
+      width: this.props.width,
+      height: this.props.height,
+      nodes: this.props.nodes,
+      links: this.props.links,
+      firstInit: true
+    });
   }
 
   componentWillReceiveProps(newProps: Props) {
@@ -54,11 +58,13 @@ export class GraphComponent extends Component<Props, State> {
       newProps.nodes !== this.props.nodes ||
       newProps.links !== this.props.links
     ) {
-      this.layout.init(
-        { width: this.props.width, height: this.props.height },
-        newProps.nodes,
-        newProps.links
-      );
+      this.layout.init({
+        width: newProps.width,
+        height: newProps.height,
+        nodes: newProps.nodes,
+        links: newProps.links,
+        firstInit: false
+      });
     }
   }
 
@@ -67,41 +73,69 @@ export class GraphComponent extends Component<Props, State> {
     this.layout.clearTimer();
   }
 
-  handleNodeClick = (node: GraphNode) => {
+  handleNodeMouseDown = (node: GraphNode, e: MouseEvent) => {
     console.log("Node click!", node);
     for (const n of this.props.nodes) {
       n.selected = false;
     }
     node.selected = true;
-    this.forceUpdate();
-  };
 
-  mouseDown = (e: MouseEvent) => {
     this.setState({
-      mouseDown: true,
-      cameraDragStartX: this.state.cameraX,
-      cameraDragStartY: this.state.cameraY,
-      mouseDragStartClientX: e.clientX,
-      mouseDragStartClientY: e.clientY
+      dragNode: node,
+      dragStartNodeX: node.x,
+      dragStartNodeY: node.y,
+      dragStartNodeMouseX: e.x,
+      dragStartNodeMouseY: e.y
     });
   };
 
-  mouseUp = () => {
-    this.setState({ mouseDown: false });
+  handleGraphMouseDown = (e: MouseEvent) => {
+    this.setState({
+      mouseDown: true,
+      dragNode: undefined,
+      dragStartCameraX: this.state.cameraX,
+      dragStartCameraY: this.state.cameraY,
+      dragStartCameraMouseX: e.x,
+      dragStartCameraMouseY: e.y
+    });
   };
 
-  mouseMove = (e: MouseEvent) => {
-    if (this.state.mouseDown) {
-      const dx = this.state.mouseDragStartClientX - e.clientX;
-      const dy = this.state.mouseDragStartClientY - e.clientY;
+  handleGraphMouseUp = () => {
+    const dragNode = this.state.dragNode;
+    if (dragNode) {
+      dragNode.fixed = 0;
+      this.layout.triggerLayout();
+    }
+    this.setState({
+      mouseDown: false,
+      dragNode: undefined
+    });
+  };
+
+  handleGraphMouseMove = (e: MouseEvent) => {
+    const dragNode = this.state.dragNode;
+    if (dragNode) {
+      const dx = (this.state.dragStartNodeMouseX || 0) - e.x;
+      const dy = (this.state.dragStartNodeMouseY || 0) - e.y;
+      dragNode.x =
+        (this.state.dragStartNodeX || 0) - dx / this.state.cameraZoom;
+      dragNode.y =
+        (this.state.dragStartNodeY || 0) - dy / this.state.cameraZoom;
+      dragNode.px = dragNode.x;
+      dragNode.py = dragNode.y;
+      dragNode.fixed = 1;
+      this.layout.triggerLayout();
+    } else if (this.state.mouseDown) {
+      const dx = (this.state.dragStartCameraMouseX || 0) - e.x;
+      const dy = (this.state.dragStartCameraMouseY || 0) - e.y;
       this.setState({
-        cameraX: this.state.cameraDragStartX - dx,
-        cameraY: this.state.cameraDragStartY - dy
+        cameraX: (this.state.dragStartCameraX || 0) - dx,
+        cameraY: (this.state.dragStartCameraY || 0) - dy
       });
     }
   };
 
-  handleWheel = (e: WheelEvent) => {
+  handleGraphWheel = (e: WheelEvent) => {
     let zoomFactor = (e.deltaZ || e.deltaY) / 200;
     zoomFactor = Math.max(-1, zoomFactor);
     zoomFactor = Math.min(1, zoomFactor);
@@ -113,6 +147,10 @@ export class GraphComponent extends Component<Props, State> {
       cameraZoom: newScale
     });
   };
+
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
+    return this.layout.isLayoutCalculated ? true : false;
+  }
 
   render() {
     const { width, height } = this.props;
@@ -126,34 +164,38 @@ export class GraphComponent extends Component<Props, State> {
           "is-mouse-down": this.state.mouseDown
         })}
       >
-        <svg
-          style={{ width, height }}
-          onMouseDown={this.mouseDown}
-          onMouseMove={this.mouseMove}
-          onMouseUp={this.mouseUp}
-          onMouseLeave={this.mouseUp}
-          onWheel={this.handleWheel}
-        >
-          <g
-            transform={`scale(${cameraZoom}) translate(${translateX}, ${translateY})`}
+        {this.layout.isLayoutCalculated ? (
+          <svg
+            style={{ width, height }}
+            onMouseDown={this.handleGraphMouseDown}
+            onMouseMove={this.handleGraphMouseMove}
+            onMouseUp={this.handleGraphMouseUp}
+            onMouseLeave={this.handleGraphMouseUp}
+            onWheel={this.handleGraphWheel}
           >
-            <g transform={`translate(${width / 2}, ${height / 2})`}>
-              {this.props.links.map(link => (
-                <LinkComponent
-                  key={link.source.id + "-" + link.target.id}
-                  link={link}
-                />
-              ))}
-              {this.props.nodes.map(node => (
-                <NodeComponent
-                  key={node.id}
-                  node={node}
-                  onNodeClick={this.handleNodeClick}
-                />
-              ))}
+            <g
+              transform={`scale(${cameraZoom}) translate(${translateX}, ${translateY})`}
+            >
+              <g transform={`translate(${width / 2}, ${height / 2})`}>
+                {this.props.links.map(link => (
+                  <LinkComponent
+                    key={link.source.id + "-" + link.target.id}
+                    link={link}
+                  />
+                ))}
+                {this.props.nodes.map(node => (
+                  <NodeComponent
+                    key={node.id}
+                    node={node}
+                    onNodeMouseDown={this.handleNodeMouseDown}
+                  />
+                ))}
+              </g>
             </g>
-          </g>
-        </svg>
+          </svg>
+        ) : (
+          <span />
+        )}
       </div>
     );
   }

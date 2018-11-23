@@ -6,6 +6,10 @@ export interface GraphNode {
   width?: number;
   height?: number;
   selected?: boolean;
+
+  fixed?: number;
+  px?: number;
+  py?: number;
 }
 
 export interface GraphLink {

@@ -2,7 +2,11 @@ import { h, Component } from "preact";
 
 import { NavbarComponent } from "./common/navbar.component";
 import { GraphNode, GraphLink } from "src/ui/graph/objects";
-import { getRandomWord, getRandomNumber } from "src/helpers/random";
+import {
+  getRandomWord,
+  getRandomNumber,
+  getRandomName
+} from "src/helpers/random";
 import { GraphComponent } from "./graph/graph.component";
 import { getInitialGraph } from "./services/data-loader";
 
@@ -26,7 +30,7 @@ export class MainComponent extends Component<Props, State> {
           this.state.nodes[this.state.nodes.length - 1]
         : undefined;
 
-    const randomId = getRandomWord(6);
+    const randomId = getRandomName();
     const newNode: GraphNode = {
       id: randomId,
       label: randomId,
@@ -72,17 +76,6 @@ export class MainComponent extends Component<Props, State> {
     }
   };
 
-  onShakeBtnClick = async () => {
-    const newNodes = [...this.state.nodes];
-    for (let node of newNodes) {
-      node.x = (node.x || 0) + getRandomNumber(-100, 100);
-      node.y = (node.y || 0) + getRandomNumber(-100, 100);
-    }
-    this.setState({
-      nodes: newNodes
-    });
-  };
-
   render() {
     return (
       <div>
@@ -99,13 +92,6 @@ export class MainComponent extends Component<Props, State> {
                 onClick={this.onDeleteNodeClick}
               >
                 Delete node
-              </a>
-              <a
-                className="navbar-item"
-                href="#"
-                onClick={this.onShakeBtnClick}
-              >
-                Shake
               </a>
             </div>
           }
