@@ -1,5 +1,8 @@
 import { h, Component } from "preact";
 import * as cn from "classnames";
+import { ensure } from "src/helpers/syntax";
+import { getRandomWord } from "src/helpers/random";
+
 import { GraphNode, GraphLink } from "./graph-objects";
 import { NodeComponent } from "./node.component";
 import { LinkComponent } from "./link.component";
@@ -8,6 +11,8 @@ import { GraphColaLayout } from "./graph-cola-layout";
 import "./graph.component.less";
 
 export interface State {
+  width: number;
+  height: number;
   cameraX: number;
   cameraY: number;
   cameraZoom: number;
@@ -27,32 +32,44 @@ export interface State {
 export interface Props {
   nodes: GraphNode[];
   links: GraphLink[];
-  width: number;
-  height: number;
   selectedNode?: GraphNode;
   onSelectNode(node?: GraphNode): void;
 }
 
 export class GraphComponent extends Component<Props, State> {
   private layout = new GraphColaLayout(() => this.forceUpdate());
+  private readonly componentId = "graph-component-" + getRandomWord(16);
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      cameraX: props.width / 2,
-      cameraY: props.height / 2,
+      width: 0,
+      height: 0,
+      cameraX: 0,
+      cameraY: 0,
       cameraZoom: 1
     };
   }
 
   componentDidMount() {
+    const { width, height } = this.getParentContainerDimensions();
+
+    this.setState({
+      width,
+      height,
+      cameraX: width / 2,
+      cameraY: height / 2
+    });
+
     this.layout.init({
-      width: this.props.width,
-      height: this.props.height,
+      width,
+      height,
       nodes: this.props.nodes,
       links: this.props.links,
       firstInit: true
     });
+
+    window.addEventListener("resize", this.handleWindowResize);
   }
 
   componentWillReceiveProps(newProps: Props) {
@@ -61,8 +78,8 @@ export class GraphComponent extends Component<Props, State> {
       newProps.links !== this.props.links
     ) {
       this.layout.init({
-        width: newProps.width,
-        height: newProps.height,
+        width: this.state.width,
+        height: this.state.height,
         nodes: newProps.nodes,
         links: newProps.links,
         firstInit: false
@@ -73,6 +90,30 @@ export class GraphComponent extends Component<Props, State> {
   componentWillUnmount() {
     this.layout.stop();
     this.layout.clearTimer();
+    window.removeEventListener("resize", this.handleWindowResize);
+  }
+
+  handleWindowResize = () => {
+    const { width, height } = this.getParentContainerDimensions();
+    const dx = (this.state.width - width) * this.state.cameraZoom;
+    const dy = (this.state.height - height) * this.state.cameraZoom;
+    this.setState({
+      width,
+      height,
+      cameraX: this.state.cameraX - dx,
+      cameraY: this.state.cameraY - dy
+    });
+    this.layout.size([width, height]).triggerLayout();
+  };
+
+  getParentContainerDimensions() {
+    const componentDomElement = document.getElementById(this.componentId);
+    if (!componentDomElement) {
+      throw new Error("Can't locate graph root DOM element");
+    }
+    const containerElement = ensure(componentDomElement.parentElement);
+    const rect = containerElement.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
   }
 
   handleNodeMouseDown = (node: GraphNode, e: MouseEvent) => {
@@ -153,14 +194,15 @@ export class GraphComponent extends Component<Props, State> {
   }
 
   render() {
-    const { width, height } = this.props;
+    const { width, height } = this.state;
     const { cameraZoom, cameraX, cameraY } = this.state;
     const translateX = Math.round(cameraX / cameraZoom - width);
     const translateY = Math.round(cameraY / cameraZoom - height);
 
     return (
       <div
-        className={cn("graph-container", {
+        id={this.componentId}
+        className={cn("graph-component", {
           "is-mouse-down": this.state.mouseDown
         })}
       >

@@ -5,7 +5,9 @@ import { ensure } from "./helpers/syntax";
 
 import { appStore, AppState } from "./services/store";
 import { actions } from "./services/actions";
-import { MainComponent } from "./ui/main";
+import { MainComponent } from "./ui/main.component";
+
+import "./app.less";
 
 const ConnectedMain = connect(
   (state: AppState) => state,

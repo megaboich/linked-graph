@@ -5,6 +5,8 @@ import { NavbarComponent } from "./common/navbar.component";
 import { GraphNode } from "./graph/graph-objects";
 import { GraphComponent } from "./graph/graph.component";
 
+import "./main.component.less";
+
 export interface Props {
   selectedVertex?: GraphVertex;
   vertices: GraphVertex[];
@@ -38,7 +40,7 @@ export class MainComponent extends Component<Props, State> {
 
   render() {
     return (
-      <div>
+      <div className="main-component">
         <NavbarComponent
           brandContent={<span className="navbar-item">Linked graph</span>}
           menuContent={
@@ -60,14 +62,16 @@ export class MainComponent extends Component<Props, State> {
             </div>
           }
         />
-        <GraphComponent
-          width={1000}
-          height={800}
-          nodes={this.props.vertices}
-          links={this.props.edges}
-          selectedNode={this.props.selectedVertex}
-          onSelectNode={this.handleOnSelectNode}
-        />
+        <div className="graph-container">
+          {
+            <GraphComponent
+              nodes={this.props.vertices}
+              links={this.props.edges}
+              selectedNode={this.props.selectedVertex}
+              onSelectNode={this.handleOnSelectNode}
+            />
+          }
+        </div>
       </div>
     );
   }

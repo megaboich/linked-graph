@@ -29,10 +29,10 @@ export class NodeComponent extends Component<Props, State> {
     const nodeY = Math.round(node.y);
     return (
       <g
-        transform={`translate(${nodeX}, ${nodeY})`}
         className={cn("graph-node", {
           "is-selected": this.props.isSelected
         })}
+        transform={`translate(${nodeX}, ${nodeY})`}
         onMouseDown={this.handleMouseDown}
       >
         <circle r="5">
