@@ -1,11 +1,12 @@
 import { h, Component } from "preact";
 import * as cn from "classnames";
-import { GraphNode } from "src/ui/graph/objects";
+import { GraphNode } from "./graph-objects";
 
 export interface State {}
 
 export interface Props {
   node: GraphNode;
+  isSelected?: boolean;
   onNodeMouseDown(node: GraphNode, e: MouseEvent): void;
 }
 
@@ -30,7 +31,7 @@ export class NodeComponent extends Component<Props, State> {
       <g
         transform={`translate(${nodeX}, ${nodeY})`}
         className={cn("graph-node", {
-          "is-selected": this.props.node.selected
+          "is-selected": this.props.isSelected
         })}
         onMouseDown={this.handleMouseDown}
       >

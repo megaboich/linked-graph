@@ -20,7 +20,8 @@
     "jsxFactory": "h",
     "types": ["node"],
     "lib": ["dom", "es2017"],
-    "importHelpers": true
+    "importHelpers": true,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "dist"]
 }

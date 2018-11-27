@@ -1,6 +1,6 @@
 import { h, Component } from "preact";
 import * as cn from "classnames";
-import { GraphNode, GraphLink } from "./objects";
+import { GraphNode, GraphLink } from "./graph-objects";
 import { NodeComponent } from "./node.component";
 import { LinkComponent } from "./link.component";
 import { GraphColaLayout } from "./graph-cola-layout";
@@ -29,6 +29,8 @@ export interface Props {
   links: GraphLink[];
   width: number;
   height: number;
+  selectedNode?: GraphNode;
+  onSelectNode(node?: GraphNode): void;
 }
 
 export class GraphComponent extends Component<Props, State> {
@@ -74,11 +76,7 @@ export class GraphComponent extends Component<Props, State> {
   }
 
   handleNodeMouseDown = (node: GraphNode, e: MouseEvent) => {
-    console.log("Node click!", node);
-    for (const n of this.props.nodes) {
-      n.selected = false;
-    }
-    node.selected = true;
+    this.props.onSelectNode(node);
 
     this.setState({
       dragNode: node,
@@ -90,6 +88,8 @@ export class GraphComponent extends Component<Props, State> {
   };
 
   handleGraphMouseDown = (e: MouseEvent) => {
+    this.props.onSelectNode(undefined);
+
     this.setState({
       mouseDown: true,
       dragNode: undefined,
@@ -188,6 +188,7 @@ export class GraphComponent extends Component<Props, State> {
                     key={node.id}
                     node={node}
                     onNodeMouseDown={this.handleNodeMouseDown}
+                    isSelected={this.props.selectedNode === node}
                   />
                 ))}
               </g>

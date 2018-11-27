@@ -1,5 +1,5 @@
 import { h, Component } from "preact";
-import { GraphLink } from "src/ui/graph/objects";
+import { GraphLink } from "./graph-objects";
 
 export interface State {}
 

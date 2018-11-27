@@ -1,5 +1,5 @@
 import * as cola from "webcola";
-import { GraphNode, GraphLink } from "src/ui/graph/objects";
+import { GraphNode, GraphLink } from "./graph-objects";
 
 export class GraphColaLayout extends cola.Layout {
   private timerHandle: any;
@@ -50,7 +50,7 @@ export class GraphColaLayout extends cola.Layout {
       })
       .on(cola.EventType.tick, e => {
         this.isLayoutCalculated = true;
-        
+
         // Unfix previously fixed nodes
         if (shouldRevertOriginalFixedState) {
           for (let ni = 0; ni < options.nodes.length; ++ni) {
@@ -58,7 +58,7 @@ export class GraphColaLayout extends cola.Layout {
           }
           shouldRevertOriginalFixedState = false;
         }
-        
+
         if (this.isRunning) {
           this.render();
         }
