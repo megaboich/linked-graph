@@ -1,4 +1,5 @@
-import { h, Component } from "preact";
+import * as React from "react";
+import { Component, MouseEvent } from "react";
 import * as cn from "classnames";
 import { GraphNode } from "./graph-objects";
 
@@ -16,7 +17,7 @@ export class NodeComponent extends Component<Props, State> {
     this.state = {};
   }
 
-  handleMouseDown = (e: MouseEvent) => {
+  handleMouseDown = (e: MouseEvent<SVGGElement>) => {
     e.preventDefault();
     e.stopPropagation();
     this.props.onNodeMouseDown(this.props.node, e);

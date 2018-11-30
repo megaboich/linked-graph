@@ -1,4 +1,5 @@
-import { h, Component } from "preact";
+import * as React from "react";
+import { Component } from "react";
 
 import { GraphVertex, GraphEdge } from "src/services/graph-model";
 import { NavbarComponent } from "./common/navbar.component";

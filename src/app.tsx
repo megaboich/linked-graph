@@ -1,16 +1,17 @@
-﻿import { h, render } from "preact";
-import { Provider, connect } from "redux-zero/preact";
+﻿import * as React from "react";
+import * as ReactDOM from "react-dom";
+import { Provider, connect } from "redux-zero/react";
 import "bulma/css/bulma.min.css";
 import { ensure } from "./helpers/syntax";
 
-import { appStore, AppState } from "./services/store";
+import { appStore } from "./services/store";
 import { actions } from "./services/actions";
 import { MainComponent } from "./ui/main.component";
 
 import "./app.less";
 
 const ConnectedMain = connect(
-  (state: AppState) => state,
+  (state: any) => state,
   actions
 )(MainComponent);
 
@@ -18,7 +19,7 @@ async function runApplication() {
   const appContainer = ensure(document.getElementById("app-container"));
   appContainer.innerHTML = "";
 
-  render(
+  ReactDOM.render(
     <Provider store={appStore}>
       <ConnectedMain />
     </Provider>,

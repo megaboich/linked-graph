@@ -20,8 +20,7 @@ export class GraphColaLayout extends cola.Layout {
     links: GraphLink[];
     firstInit: boolean;
   }) {
-    this.clearTimer();
-    this.timerHandle = setInterval(this.timerTick, 100);
+    this.startTimer();
     this.isLayoutCalculated = false;
 
     /**
@@ -73,7 +72,7 @@ export class GraphColaLayout extends cola.Layout {
 
   triggerLayout() {
     if (!this.isRunning) {
-      this.timerHandle = setInterval(this.timerTick, 100);
+      this.startTimer();
       this.resume();
     }
   }
@@ -91,6 +90,12 @@ export class GraphColaLayout extends cola.Layout {
    */
   protected tick() {
     return true;
+  }
+
+  startTimer() {
+    if (!this.timerHandle) {
+      this.timerHandle = setInterval(this.timerTick, 50);
+    }
   }
 
   clearTimer() {

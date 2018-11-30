@@ -1,4 +1,5 @@
-import { h, Component } from "preact";
+import * as React from "react";
+import { Component, MouseEvent, WheelEvent } from "react";
 import * as cn from "classnames";
 import { ensure } from "src/helpers/syntax";
 import { getRandomWord } from "src/helpers/random";
@@ -116,19 +117,19 @@ export class GraphComponent extends Component<Props, State> {
     return { width: rect.width, height: rect.height };
   }
 
-  handleNodeMouseDown = (node: GraphNode, e: MouseEvent) => {
+  handleNodeMouseDown = (node: GraphNode, e: MouseEvent<SVGGElement>) => {
     this.props.onSelectNode(node);
 
     this.setState({
       dragNode: node,
       dragStartNodeX: node.x,
       dragStartNodeY: node.y,
-      dragStartNodeMouseX: e.x,
-      dragStartNodeMouseY: e.y
+      dragStartNodeMouseX: e.clientX,
+      dragStartNodeMouseY: e.clientY
     });
   };
 
-  handleGraphMouseDown = (e: MouseEvent) => {
+  handleGraphMouseDown = (e: MouseEvent<SVGGElement>) => {
     this.props.onSelectNode(undefined);
 
     this.setState({
@@ -136,8 +137,8 @@ export class GraphComponent extends Component<Props, State> {
       dragNode: undefined,
       dragStartCameraX: this.state.cameraX,
       dragStartCameraY: this.state.cameraY,
-      dragStartCameraMouseX: e.x,
-      dragStartCameraMouseY: e.y
+      dragStartCameraMouseX: e.clientX,
+      dragStartCameraMouseY: e.clientY
     });
   };
 
@@ -153,11 +154,11 @@ export class GraphComponent extends Component<Props, State> {
     });
   };
 
-  handleGraphMouseMove = (e: MouseEvent) => {
+  handleGraphMouseMove = (e: MouseEvent<SVGGElement>) => {
     const dragNode = this.state.dragNode;
     if (dragNode) {
-      const dx = (this.state.dragStartNodeMouseX || 0) - e.x;
-      const dy = (this.state.dragStartNodeMouseY || 0) - e.y;
+      const dx = (this.state.dragStartNodeMouseX || 0) - e.clientX;
+      const dy = (this.state.dragStartNodeMouseY || 0) - e.clientY;
       dragNode.x =
         (this.state.dragStartNodeX || 0) - dx / this.state.cameraZoom;
       dragNode.y =
@@ -165,10 +166,11 @@ export class GraphComponent extends Component<Props, State> {
       dragNode.px = dragNode.x;
       dragNode.py = dragNode.y;
       dragNode.fixed = 1;
+      this.forceUpdate();
       this.layout.triggerLayout();
     } else if (this.state.mouseDown) {
-      const dx = (this.state.dragStartCameraMouseX || 0) - e.x;
-      const dy = (this.state.dragStartCameraMouseY || 0) - e.y;
+      const dx = (this.state.dragStartCameraMouseX || 0) - e.clientX;
+      const dy = (this.state.dragStartCameraMouseY || 0) - e.clientY;
       this.setState({
         cameraX: (this.state.dragStartCameraX || 0) - dx,
         cameraY: (this.state.dragStartCameraY || 0) - dy
@@ -176,7 +178,7 @@ export class GraphComponent extends Component<Props, State> {
     }
   };
 
-  handleGraphWheel = (e: WheelEvent) => {
+  handleGraphWheel = (e: WheelEvent<SVGGElement>) => {
     let zoomFactor = (e.deltaZ || e.deltaY) / 200;
     zoomFactor = Math.max(-1, zoomFactor);
     zoomFactor = Math.min(1, zoomFactor);
