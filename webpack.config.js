@@ -62,7 +62,7 @@ module.exports = function(env) {
           }
         },
         {
-          test: /\.(png|jpg|jpeg|gif|svg)$/,
+          test: /\.(png|jpg|jpeg|gif|svg|woff)$/,
           loader: "url-loader",
           options: { limit: 200000 }
         },

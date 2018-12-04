@@ -1,5 +1,5 @@
 import { getRandomNumber } from "src/helpers/random";
-import { GraphVertex, GraphEdge } from "src/services/graph-model";
+import { GraphObject, GraphConnection } from "src/services/graph-model";
 
 function getRandomCoordinates() {
   return {
@@ -9,7 +9,7 @@ function getRandomCoordinates() {
 }
 
 export function getInitialGraph() {
-  const vertices: GraphVertex[] = [
+  const objects: GraphObject[] = [
     { id: "W", ...getRandomCoordinates() },
     { id: "E", ...getRandomCoordinates() },
     { id: "B", ...getRandomCoordinates() },
@@ -19,15 +19,15 @@ export function getInitialGraph() {
     { id: "A", ...getRandomCoordinates() }
   ];
 
-  const edges: GraphEdge[] = [
-    { source: vertices[0], target: vertices[1] },
-    { source: vertices[1], target: vertices[2] },
-    { source: vertices[2], target: vertices[3] },
-    { source: vertices[3], target: vertices[4] },
-    { source: vertices[4], target: vertices[5] },
-    { source: vertices[5], target: vertices[6] },
-    { source: vertices[6], target: vertices[0] }
+  const connections: GraphConnection[] = [
+    { source: objects[0], target: objects[1] },
+    { source: objects[1], target: objects[2] },
+    { source: objects[2], target: objects[3] },
+    { source: objects[3], target: objects[4] },
+    { source: objects[4], target: objects[5] },
+    { source: objects[5], target: objects[6] },
+    { source: objects[6], target: objects[0] }
   ];
 
-  return { vertices, edges };
+  return { objects, connections };
 }

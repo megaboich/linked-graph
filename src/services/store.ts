@@ -1,13 +1,14 @@
 import * as createStore from "redux-zero";
 import Store from "redux-zero/interfaces/Store";
 
-import { GraphVertex, GraphEdge } from "src/services/graph-model";
+import { GraphObject, GraphConnection } from "src/services/graph-model";
 import { getInitialGraph } from "src/services/data-loader";
 
 export interface AppState {
-  selectedVertex?: GraphVertex;
-  vertices: GraphVertex[];
-  edges: GraphEdge[];
+  selectedObject?: GraphObject;
+  showObjectDetails?: boolean;
+  objects: GraphObject[];
+  connections: GraphConnection[];
 }
 
 const defaultAppState: AppState = {

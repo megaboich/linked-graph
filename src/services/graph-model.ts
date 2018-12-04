@@ -1,4 +1,4 @@
-export interface GraphVertex {
+export interface GraphObject {
   id: string;
   label?: string;
   x: number;
@@ -7,7 +7,7 @@ export interface GraphVertex {
   height?: number;
 }
 
-export interface GraphEdge {
-  source: GraphVertex;
-  target: GraphVertex;
+export interface GraphConnection {
+  source: GraphObject;
+  target: GraphObject;
 }

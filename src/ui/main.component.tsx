@@ -1,20 +1,22 @@
 import * as React from "react";
 import { Component } from "react";
 
-import { GraphVertex, GraphEdge } from "src/services/graph-model";
+import { GraphObject, GraphConnection } from "src/services/graph-model";
 import { NavbarComponent } from "./common/navbar.component";
 import { GraphNode } from "./graph/graph-objects";
 import { GraphComponent } from "./graph/graph.component";
 
 import "./main.component.less";
+import { AppState } from "src/services/store";
+import { ModalComponent } from "./common/modal.component";
+import { ObjectDetailsModalComponent } from "./object-details-modal.component";
 
-export interface Props {
-  selectedVertex?: GraphVertex;
-  vertices: GraphVertex[];
-  edges: GraphEdge[];
-  selectVertex(vertex?: GraphVertex): void;
-  addVertex(): void;
-  removeVertex(): void;
+export interface Props extends AppState {
+  selectObject(object?: GraphObject): void;
+  addObject(): void;
+  removeObject(): void;
+  toggleObjectDetails(show: boolean): void;
+  editObject(newObject: GraphObject, newConnections: GraphConnection[]): void;
 }
 
 export interface State {}
@@ -28,15 +30,30 @@ export class MainComponent extends Component<Props, State> {
   }
 
   handleNewNodeClick = () => {
-    this.props.addVertex();
+    this.props.addObject();
   };
 
   handleDeleteNodeClick = () => {
-    this.props.removeVertex();
+    this.props.removeObject();
   };
 
   handleOnSelectNode = (node?: GraphNode) => {
-    this.props.selectVertex(node);
+    this.props.selectObject(node);
+  };
+
+  handleCloseDetailsModal = () => {
+    this.props.toggleObjectDetails(false);
+  };
+
+  handleShowDetailsButtonClick = () => {
+    this.props.toggleObjectDetails(true);
+  };
+
+  handleGraphModification = (
+    newObject: GraphObject,
+    newConnections: GraphConnection[]
+  ) => {
+    this.props.editObject(newObject, newConnections);
   };
 
   render() {
@@ -63,15 +80,46 @@ export class MainComponent extends Component<Props, State> {
             </div>
           }
         />
+        {this.props.showObjectDetails && this.props.selectedObject && (
+          <ObjectDetailsModalComponent
+            object={this.props.selectedObject}
+            allObjects={this.props.objects}
+            allConnections={this.props.connections}
+            onClose={this.handleCloseDetailsModal}
+            onSave={this.handleGraphModification}
+          />
+        )}
+
         <div className="graph-container">
-          {
-            <GraphComponent
-              nodes={this.props.vertices}
-              links={this.props.edges}
-              selectedNode={this.props.selectedVertex}
-              onSelectNode={this.handleOnSelectNode}
-            />
-          }
+          <GraphComponent
+            nodes={this.props.objects}
+            links={this.props.connections}
+            selectedNode={this.props.selectedObject}
+            onSelectNode={this.handleOnSelectNode}
+          />
+
+          <div className="control-block">
+            <button
+              type="button"
+              className="button is-rounded is-medium"
+              onClick={this.handleNewNodeClick}
+            >
+              <span className="icon">
+                <span className="oi" data-glyph="plus" />
+              </span>
+            </button>
+            {this.props.selectedObject && (
+              <button
+                type="button"
+                className="button is-rounded is-medium"
+                onClick={this.handleShowDetailsButtonClick}
+              >
+                <span className="icon">
+                  <span className="oi" data-glyph="pencil" />
+                </span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
