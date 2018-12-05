@@ -193,61 +193,79 @@ export class ObjectDetailsModalComponent extends Component<
   ) {
     return (
       <div className="connection">
-        {connection.source && connection.source.id === this.props.object.id && (
-          <>
-            <span className="tag is-medium">{this.state.objectName}</span>
+        <div className="media">
+          <div className="media-content">
+            <div className="connection-content">
+              {connection.source &&
+                connection.source.id === this.props.object.id && (
+                  <>
+                    <div className="self-object-name">
+                      {this.state.objectName}
+                    </div>
 
-            {this.renderLinkSelector()}
+                    {this.renderLinkSelector()}
 
-            {this.renderObjectSelector({
-              allObjects: objectsOptions,
-              objId: connection.target ? connection.target.id : undefined,
-              onSelect: newObj => {
-                connection.target = newObj;
-                this.forceUpdate();
-              }
-            })}
-          </>
-        )}
-        {connection.target && connection.target.id === this.props.object.id && (
-          <>
-            {this.renderObjectSelector({
-              allObjects: objectsOptions,
-              objId: connection.source ? connection.source.id : undefined,
-              onSelect: newObj => {
-                connection.source = newObj;
-                this.forceUpdate();
-              }
-            })}
+                    {this.renderObjectSelector({
+                      allObjects: objectsOptions,
+                      objId: connection.target
+                        ? connection.target.id
+                        : undefined,
+                      onSelect: newObj => {
+                        connection.target = newObj;
+                        this.forceUpdate();
+                      }
+                    })}
+                  </>
+                )}
+              {connection.target &&
+                connection.target.id === this.props.object.id && (
+                  <>
+                    {this.renderObjectSelector({
+                      allObjects: objectsOptions,
+                      objId: connection.source
+                        ? connection.source.id
+                        : undefined,
+                      onSelect: newObj => {
+                        connection.source = newObj;
+                        this.forceUpdate();
+                      }
+                    })}
 
-            {this.renderLinkSelector()}
+                    {this.renderLinkSelector()}
 
-            <span className="tag is-medium">{this.state.objectName}</span>
-          </>
-        )}
-        <div className="buttons">
-          <button
-            type="button"
-            className="button"
-            onClick={() => {
-              this.handleReverseConnectionClick(connection);
-            }}
-          >
-            <span className="icon">
-              <span className="oi" data-glyph="transfer" />
-            </span>
-          </button>
-          <button
-            type="button"
-            className="button"
-            onClick={() => {
-              this.handleRemoveConnectionClick(connection);
-            }}
-          >
-            <span className="icon">
-              <span className="oi" data-glyph="x" />
-            </span>
-          </button>
+                    <div className="self-object-name">
+                      {this.state.objectName}
+                    </div>
+                  </>
+                )}
+            </div>
+          </div>
+          <div className="media-right">
+            <nav className="level is-mobile">
+              <div className="level-left">
+                <a
+                  className="level-item"
+                  onClick={() => {
+                    this.handleReverseConnectionClick(connection);
+                  }}
+                >
+                  <span className="icon">
+                    <span className="oi" data-glyph="loop-square" />
+                  </span>
+                </a>
+                <a
+                  className="level-item"
+                  onClick={() => {
+                    this.handleRemoveConnectionClick(connection);
+                  }}
+                >
+                  <span className="icon">
+                    <span className="oi" data-glyph="trash" />
+                  </span>
+                </a>
+              </div>
+            </nav>
+          </div>
         </div>
       </div>
     );

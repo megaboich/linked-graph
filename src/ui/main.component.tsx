@@ -10,6 +10,7 @@ import "./main.component.less";
 import { AppState } from "src/services/store";
 import { ModalComponent } from "./common/modal.component";
 import { ObjectDetailsModalComponent } from "./object-details-modal.component";
+import { getSamples, GraphSample } from "src/services/data/data-loader";
 
 export interface Props extends AppState {
   selectObject(object?: GraphObject): void;
@@ -17,12 +18,13 @@ export interface Props extends AppState {
   removeObject(): void;
   toggleObjectDetails(show: boolean): void;
   editObject(newObject: GraphObject, newConnections: GraphConnection[]): void;
+  loadGraph(objects: GraphObject[], connections: GraphConnection[]): void;
 }
 
 export interface State {}
 
 export class MainComponent extends Component<Props, State> {
-  state: State;
+  readonly samples = getSamples();
 
   constructor(props: Props) {
     super(props);
@@ -56,28 +58,50 @@ export class MainComponent extends Component<Props, State> {
     this.props.editObject(newObject, newConnections);
   };
 
+  handleLoadSampleClick = (sample: GraphSample) => {
+    const graph = sample.getGraph();
+    this.props.loadGraph(graph.objects, graph.connections);
+  };
+
   render() {
     return (
       <div className="main-component">
         <NavbarComponent
           brandContent={<span className="navbar-item">Linked graph</span>}
           menuContent={
-            <div className="navbar-end">
-              <a
-                className="navbar-item"
-                href="#"
-                onClick={this.handleNewNodeClick}
-              >
-                New node
-              </a>
-              <a
-                className="navbar-item"
-                href="#"
-                onClick={this.handleDeleteNodeClick}
-              >
-                Delete node
-              </a>
-            </div>
+            <>
+              <div className="navbar-item has-dropdown is-hoverable">
+                <a className="navbar-link">Samples</a>
+                <div className="navbar-dropdown">
+                  {this.samples.map(x => (
+                    <a
+                      key={x.name}
+                      className="navbar-item"
+                      onClick={() => this.handleLoadSampleClick(x)}
+                    >
+                      {x.name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div className="navbar-end">
+                <a
+                  className="navbar-item"
+                  href="#"
+                  onClick={this.handleNewNodeClick}
+                >
+                  New node
+                </a>
+                <a
+                  className="navbar-item"
+                  href="#"
+                  onClick={this.handleDeleteNodeClick}
+                >
+                  Delete node
+                </a>
+              </div>
+            </>
           }
         />
         {this.props.showObjectDetails && this.props.selectedObject && (

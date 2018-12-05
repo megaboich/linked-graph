@@ -3,6 +3,7 @@ import { getRandomName, getRandomNumber } from "src/helpers/random";
 
 import { AppState } from "./store";
 import { GraphObject, GraphConnection } from "./graph-model";
+import { saveGraphToLocalStorage } from "./data/graph-local-storage";
 
 export const actions = (store: Store) => ({
   selectObject,
@@ -14,7 +15,8 @@ export const actions = (store: Store) => ({
       showObjectDetails: show
     };
   },
-  editObject
+  editObject,
+  loadGraph
 });
 
 function selectObject(state: AppState, object?: GraphObject): AppState {
@@ -54,12 +56,14 @@ function addObject(state: AppState): AppState {
     connections.push(newConnection);
   }
 
-  return {
+  const newState: AppState = {
     ...state,
     objects: objects,
     connections: connections,
     selectedObject: newObj
   };
+  saveGraphToLocalStorage(newState);
+  return newState;
 }
 
 function removeObject(state: AppState): AppState {
@@ -69,12 +73,15 @@ function removeObject(state: AppState): AppState {
     const connections = state.connections.filter(
       x => x.source.id != idToDelete && x.target.id != idToDelete
     );
-    return {
+
+    const newState: AppState = {
       ...state,
       objects: objects,
       connections: connections,
       selectedObject: undefined
     };
+    saveGraphToLocalStorage(newState);
+    return newState;
   }
   return state;
 }
@@ -104,10 +111,27 @@ function editObject(
   objects.push(newObject);
   connections.push(...newConnections);
 
-  return {
+  const newState: AppState = {
     ...state,
     objects: objects,
     connections: connections,
     selectedObject: newObject
+  };
+
+  saveGraphToLocalStorage(newState);
+  return newState;
+}
+
+function loadGraph(
+  state: AppState,
+  objects: GraphObject[],
+  connections: GraphConnection[]
+): AppState {
+  return {
+    ...state,
+    objects: objects,
+    connections: connections,
+    selectedObject: undefined,
+    showObjectDetails: false
   };
 }

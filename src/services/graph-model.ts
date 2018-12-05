@@ -11,3 +11,8 @@ export interface GraphConnection {
   source: GraphObject;
   target: GraphObject;
 }
+
+export interface GraphModel {
+  objects: GraphObject[];
+  connections: GraphConnection[];
+}

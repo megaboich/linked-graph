@@ -2,7 +2,7 @@ import * as createStore from "redux-zero";
 import Store from "redux-zero/interfaces/Store";
 
 import { GraphObject, GraphConnection } from "src/services/graph-model";
-import { getInitialGraph } from "src/services/data-loader";
+import { loadGraphFromLocalStorage } from "./data/graph-local-storage";
 
 export interface AppState {
   selectedObject?: GraphObject;
@@ -12,7 +12,7 @@ export interface AppState {
 }
 
 const defaultAppState: AppState = {
-  ...getInitialGraph()
+  ...loadGraphFromLocalStorage()
 };
 
 export const appStore: Store = (createStore as any)(defaultAppState);

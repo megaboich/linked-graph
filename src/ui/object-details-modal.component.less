@@ -13,20 +13,26 @@
 
   .connections-container {
     .connection {
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: solid 1px lightgray;
-      display: flex;
-      flex-wrap: wrap;
-      margin-top: -10px;
+      padding-bottom: 1em;
+    }
+
+    .media-content {
+      border-right: 4px solid #eee;
+    }
+
+    .connection-content {
+      padding: 0.5em;
+      margin-top: -0.3em;
 
       > * {
-        margin-top: 10px;
+        margin-top: 0.3em;
       }
+    }
 
-      .buttons {
-        display: inline;
-      }
+    .self-object-name {
+      display: inline;
+      padding: 0.4em;
+      font-weight: bold;
     }
   }
 }
