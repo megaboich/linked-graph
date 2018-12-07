@@ -168,18 +168,16 @@ export class ObjectDetailsModalComponent extends Component<
                   </React.Fragment>
                 ))}
               </div>
-              <div className="level">
-                <div className="level-right">
-                  <button
-                    className="button"
-                    onClick={this.handleAddConnectionClick}
-                  >
-                    <span className="icon">
-                      <IconPlus />
-                    </span>
-                    <span>Add new connection</span>
-                  </button>
-                </div>
+              <div className="has-text-right">
+                <button
+                  className="button"
+                  onClick={this.handleAddConnectionClick}
+                >
+                  <span className="icon">
+                    <IconPlus />
+                  </span>
+                  <span>Add new connection</span>
+                </button>
               </div>
             </div>
           </div>

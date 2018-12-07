@@ -9,6 +9,7 @@ export interface Props {
   node: GraphNode;
   isSelected?: boolean;
   onNodeMouseDown(node: GraphNode, e: MouseEvent): void;
+  onNodeDoubleClick?(node: GraphNode, e: MouseEvent): void;
 }
 
 export class NodeComponent extends Component<Props, State> {
@@ -23,6 +24,12 @@ export class NodeComponent extends Component<Props, State> {
     this.props.onNodeMouseDown(this.props.node, e);
   };
 
+  handleDoubleClick = (e: MouseEvent<SVGGElement>) => {
+    if (this.props.onNodeDoubleClick) {
+      this.props.onNodeDoubleClick(this.props.node, e);
+    }
+  };
+
   render() {
     const node = this.props.node;
     const text = node.label || node.id;
@@ -35,6 +42,7 @@ export class NodeComponent extends Component<Props, State> {
         })}
         transform={`translate(${nodeX}, ${nodeY})`}
         onMouseDown={this.handleMouseDown}
+        onDoubleClick={this.handleDoubleClick}
       >
         <circle r="5">
           <title>{text}</title>

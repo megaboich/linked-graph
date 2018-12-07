@@ -35,6 +35,7 @@ export interface Props {
   links: GraphLink[];
   selectedNode?: GraphNode;
   onSelectNode(node?: GraphNode): void;
+  onDoubleClickNode?(node: GraphNode): void;
 }
 
 export class GraphComponent extends Component<Props, State> {
@@ -191,6 +192,12 @@ export class GraphComponent extends Component<Props, State> {
     });
   };
 
+  handleNodeDoubleClick = (node: GraphNode) => {
+    if (this.props.onDoubleClickNode) {
+      this.props.onDoubleClickNode(node);
+    }
+  };
+
   shouldComponentUpdate(nextProps: Props, nextState: State) {
     return this.layout.isLayoutCalculated ? true : false;
   }
@@ -245,6 +252,7 @@ export class GraphComponent extends Component<Props, State> {
                     key={node.id}
                     node={node}
                     onNodeMouseDown={this.handleNodeMouseDown}
+                    onNodeDoubleClick={this.handleNodeDoubleClick}
                     isSelected={this.props.selectedNode === node}
                   />
                 ))}
