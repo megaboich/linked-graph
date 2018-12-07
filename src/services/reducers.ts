@@ -1,23 +1,50 @@
-import Store from "redux-zero/interfaces/Store";
 import { getRandomName, getRandomNumber } from "src/helpers/random";
 
 import { AppState } from "./store";
 import { GraphObject, GraphConnection } from "./graph-model";
 import { saveGraphToLocalStorage } from "./data/graph-local-storage";
 
-export const actions = (store: Store) => ({
-  selectObject,
-  removeObject,
-  addObject,
-  toggleObjectDetails: (state: AppState, show: boolean): AppState => {
-    return {
-      ...state,
-      showObjectDetails: show
-    };
-  },
-  editObject,
-  loadGraph
-});
+import { ActionType, getType } from "typesafe-actions";
+
+import * as actionCreators from "./action-creators";
+type Action = ActionType<typeof actionCreators>;
+
+export function reducer(state: AppState | undefined, action: Action): AppState {
+  if (!state) {
+    throw new Error("State must be defined");
+  }
+  switch (action.type) {
+    case getType(actionCreators.addObject):
+      return addObject(state);
+    case getType(actionCreators.removeObject):
+      return removeObject(state);
+    case getType(actionCreators.loadGraph):
+      return loadGraph(
+        state,
+        action.payload.objects,
+        action.payload.connections
+      );
+    case getType(actionCreators.modifyObject):
+      return editObject(
+        state,
+        action.payload.newObject,
+        action.payload.newConnections
+      );
+    case getType(actionCreators.selectObject):
+      return selectObject(state, action.payload);
+    case getType(actionCreators.toggleObjectDetails):
+      return toggleObjectDetails(state, action.payload);
+    default:
+      return state;
+  }
+}
+
+function toggleObjectDetails(state: AppState, show: boolean): AppState {
+  return {
+    ...state,
+    showObjectDetails: show
+  };
+}
 
 function selectObject(state: AppState, object?: GraphObject): AppState {
   return {

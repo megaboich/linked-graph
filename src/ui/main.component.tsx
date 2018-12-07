@@ -1,8 +1,11 @@
 import * as React from "react";
 import { Component } from "react";
 
-import { AppState } from "src/services/store";
-import { GraphObject, GraphConnection } from "src/services/graph-model";
+import {
+  GraphObject,
+  GraphConnection,
+  GraphModel
+} from "src/services/graph-model";
 import { GraphNode } from "./graph/graph-objects";
 import { getSamples, GraphSample } from "src/services/data/data-loader";
 
@@ -14,13 +17,18 @@ import { ObjectDetailsModalComponent } from "./object-details-modal.component";
 
 import "./main.component.less";
 
-export interface Props extends AppState {
+export interface Props {
+  selectedObject: GraphObject | undefined;
+  showObjectDetails: boolean;
+  objects: GraphObject[];
+  connections: GraphConnection[];
+
   selectObject(object?: GraphObject): void;
   addObject(): void;
   removeObject(): void;
   toggleObjectDetails(show: boolean): void;
   editObject(newObject: GraphObject, newConnections: GraphConnection[]): void;
-  loadGraph(objects: GraphObject[], connections: GraphConnection[]): void;
+  loadGraph(model: GraphModel): void;
 }
 
 export interface State {}
@@ -69,7 +77,7 @@ export class MainComponent extends Component<Props, State> {
 
   handleLoadSampleClick = (sample: GraphSample) => {
     const graph = sample.getGraph();
-    this.props.loadGraph(graph.objects, graph.connections);
+    this.props.loadGraph(graph);
   };
 
   render() {

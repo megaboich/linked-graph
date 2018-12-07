@@ -1,20 +1,33 @@
 ﻿import * as React from "react";
 import * as ReactDOM from "react-dom";
-import { Provider, connect } from "redux-zero/react";
-import "bulma/css/bulma.min.css";
+import { connect, Provider } from "react-redux";
 
 import { ensure } from "./helpers/syntax";
-
-import { appStore } from "./services/store";
-import { actions } from "./services/actions";
+import { store, AppState } from "./services/store";
+import * as actionCreators from "./services/action-creators";
 import { MainComponent } from "./ui/main.component";
 
+import "bulma/css/bulma.min.css";
 import "./ui/styles/shared.less";
 import "./app.less";
 
 const ConnectedMain = connect(
-  (state: any) => state,
-  actions
+  // Map state
+  (state: AppState) => ({
+    objects: state.objects,
+    connections: state.connections,
+    selectedObject: state.selectedObject,
+    showObjectDetails: state.showObjectDetails
+  }),
+  // Map actions
+  {
+    selectObject: actionCreators.selectObject,
+    addObject: actionCreators.addObject,
+    removeObject: actionCreators.removeObject,
+    toggleObjectDetails: actionCreators.toggleObjectDetails,
+    editObject: actionCreators.modifyObject,
+    loadGraph: actionCreators.loadGraph
+  }
 )(MainComponent);
 
 async function runApplication() {
@@ -22,7 +35,7 @@ async function runApplication() {
   appContainer.innerHTML = "";
 
   ReactDOM.render(
-    <Provider store={appStore}>
+    <Provider store={store}>
       <ConnectedMain />
     </Provider>,
     appContainer
