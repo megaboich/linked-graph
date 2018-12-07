@@ -7,6 +7,7 @@ import {
 import { getAmsterdamMetroGraphData } from "./sample-data-amsterdam-metro";
 import { getCircleGraphData } from "./sample-data-circle";
 import { getDefaultGraphData } from "./sample-default-graph";
+import { getUrsaMajorGraphData } from "./sample-ursa-major";
 
 export interface GraphSample {
   name: string;
@@ -50,27 +51,19 @@ function buildGraphFromData(points: string[], links: string[]) {
 }
 
 export function getSamples(): GraphSample[] {
-  return [
-    {
-      name: "Default graph",
-      getGraph: () => {
-        const data = getDefaultGraphData();
-        return buildGraphFromData(data.points, data.links);
-      }
-    },
-    {
-      name: "Circle graph",
-      getGraph: () => {
-        const data = getCircleGraphData();
-        return buildGraphFromData(data.points, data.links);
-      }
-    },
-    {
-      name: "Amsterdam metro",
-      getGraph: () => {
-        const data = getAmsterdamMetroGraphData();
-        return buildGraphFromData(data.points, data.links);
-      }
-    }
+  const graphs = [
+    getDefaultGraphData(),
+    getCircleGraphData(),
+    getAmsterdamMetroGraphData(),
+    getUrsaMajorGraphData()
   ];
+  return graphs.map(data => {
+    const sample: GraphSample = {
+      name: data.name,
+      getGraph: () => {
+        return buildGraphFromData(data.points, data.links);
+      }
+    };
+    return sample;
+  });
 }

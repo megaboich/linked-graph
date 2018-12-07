@@ -217,6 +217,19 @@ export class GraphComponent extends Component<Props, State> {
             onMouseLeave={this.handleGraphMouseUp}
             onWheel={this.handleGraphWheel}
           >
+            <defs>
+              <marker
+                id="marker-arrowend"
+                viewBox="0 -5 10 10"
+                refX="21"
+                refY="0"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto"
+              >
+                <path d="M0,-4L10,0L0,4" />
+              </marker>
+            </defs>
             <g
               transform={`scale(${cameraZoom}) translate(${translateX}, ${translateY})`}
             >

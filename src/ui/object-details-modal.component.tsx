@@ -2,8 +2,13 @@ import * as React from "react";
 import { Component } from "react";
 import Select from "react-select";
 import * as cn from "classnames";
+
 import { GraphObject, GraphConnection } from "src/services/graph-model";
+
 import { ModalComponent } from "./common/modal.component";
+import { IconTrash } from "./common/icons/icon-trash";
+import { IconLoopSquare } from "./common/icons/icon-loop-square";
+import { IconPlus } from "./common/icons/icon-plus";
 
 import "./object-details-modal.component.less";
 
@@ -22,6 +27,7 @@ interface IComponentProps {
   allConnections: GraphConnection[];
   onClose(): void;
   onSave(object: GraphObject, connections: GraphConnection[]): void;
+  onRemoveObject(): void;
 }
 
 export class ObjectDetailsModalComponent extends Component<
@@ -108,6 +114,10 @@ export class ObjectDetailsModalComponent extends Component<
     this.setState({ connections });
   };
 
+  handleRemoveObjectClick = () => {
+    this.props.onRemoveObject();
+  };
+
   render(): JSX.Element {
     const hasError = this.state.isNameInUse || this.state.isNameEmpty;
     let errorText = "";
@@ -151,8 +161,6 @@ export class ObjectDetailsModalComponent extends Component<
               {hasError && <p className="help is-danger">{errorText}</p>}
             </div>
             <div className="field">
-              <label className="label">Connections</label>
-
               <div className="connections-container">
                 {this.state.connections.map((connection, index) => (
                   <React.Fragment key={index}>
@@ -160,19 +168,31 @@ export class ObjectDetailsModalComponent extends Component<
                   </React.Fragment>
                 ))}
               </div>
-              <div className="has-text-right">
-                <button
-                  className="button"
-                  onClick={this.handleAddConnectionClick}
-                >
-                  <span className="icon">
-                    <span className="oi" data-glyph="plus" />
-                  </span>
-                  <span>Add new connection</span>
-                </button>
+              <div className="level">
+                <div className="level-right">
+                  <button
+                    className="button"
+                    onClick={this.handleAddConnectionClick}
+                  >
+                    <span className="icon">
+                      <IconPlus />
+                    </span>
+                    <span>Add new connection</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+        }
+        headerButtons={
+          <button
+            className="button round-borders is-danger is-outlined margin-right-small"
+            onClick={this.handleRemoveObjectClick}
+          >
+            <span className="icon">
+              <IconTrash />
+            </span>
+          </button>
         }
         footerButtons={
           <button
@@ -245,22 +265,24 @@ export class ObjectDetailsModalComponent extends Component<
               <div className="level-left">
                 <a
                   className="level-item"
+                  href="javascript:void(0)"
                   onClick={() => {
                     this.handleReverseConnectionClick(connection);
                   }}
                 >
                   <span className="icon">
-                    <span className="oi" data-glyph="loop-square" />
+                    <IconLoopSquare />
                   </span>
                 </a>
                 <a
                   className="level-item"
+                  href="javascript:void(0)"
                   onClick={() => {
                     this.handleRemoveConnectionClick(connection);
                   }}
                 >
                   <span className="icon">
-                    <span className="oi" data-glyph="trash" />
+                    <IconTrash />
                   </span>
                 </a>
               </div>

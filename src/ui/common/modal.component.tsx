@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Component } from "react";
 import * as cn from "classnames";
+import { IconX } from "./icons/icon-x";
 
 interface IComponentState {}
 
@@ -9,6 +10,7 @@ interface IComponentProps {
   show: boolean;
   body: JSX.Element;
   footerButtons?: JSX.Element;
+  headerButtons?: JSX.Element;
   width?: "default" | "medium" | "wide";
   onClose(): void;
   hideFooter?: boolean;
@@ -41,12 +43,19 @@ export class ModalComponent extends Component<
         >
           <header className="modal-card-head">
             <p className="modal-card-title">{this.props.title}</p>
+
+            {this.props.headerButtons}
+
             <button
-              className="delete"
+              className="button round-borders"
               aria-label={closeButtonText}
               title={closeButtonText}
               onClick={this.props.onClose}
-            />
+            >
+              <span className="icon">
+                <IconX />
+              </span>
+            </button>
           </header>
           <section className={cn("modal-card-body")}>{this.props.body}</section>
           {!this.props.hideFooter && (

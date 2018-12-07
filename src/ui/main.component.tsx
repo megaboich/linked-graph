@@ -1,16 +1,18 @@
 import * as React from "react";
 import { Component } from "react";
 
+import { AppState } from "src/services/store";
 import { GraphObject, GraphConnection } from "src/services/graph-model";
-import { NavbarComponent } from "./common/navbar.component";
 import { GraphNode } from "./graph/graph-objects";
+import { getSamples, GraphSample } from "src/services/data/data-loader";
+
+import { NavbarComponent } from "./common/navbar.component";
+import { IconPencil } from "./common/icons/icon-pencil";
+import { IconPlus } from "./common/icons/icon-plus";
 import { GraphComponent } from "./graph/graph.component";
+import { ObjectDetailsModalComponent } from "./object-details-modal.component";
 
 import "./main.component.less";
-import { AppState } from "src/services/store";
-import { ModalComponent } from "./common/modal.component";
-import { ObjectDetailsModalComponent } from "./object-details-modal.component";
-import { getSamples, GraphSample } from "src/services/data/data-loader";
 
 export interface Props extends AppState {
   selectObject(object?: GraphObject): void;
@@ -31,12 +33,8 @@ export class MainComponent extends Component<Props, State> {
     this.state = {};
   }
 
-  handleNewNodeClick = () => {
-    this.props.addObject();
-  };
-
-  handleDeleteNodeClick = () => {
-    this.props.removeObject();
+  handleAboutClick = () => {
+    //TODO
   };
 
   handleOnSelectNode = (node?: GraphNode) => {
@@ -56,6 +54,17 @@ export class MainComponent extends Component<Props, State> {
     newConnections: GraphConnection[]
   ) => {
     this.props.editObject(newObject, newConnections);
+  };
+
+  handleNewObjectClick = () => {
+    this.props.addObject();
+  };
+
+  handleRemoveObjectClick = () => {
+    if (this.props.selectedObject) {
+      this.props.toggleObjectDetails(false);
+      this.props.removeObject();
+    }
   };
 
   handleLoadSampleClick = (sample: GraphSample) => {
@@ -89,16 +98,9 @@ export class MainComponent extends Component<Props, State> {
                 <a
                   className="navbar-item"
                   href="#"
-                  onClick={this.handleNewNodeClick}
+                  onClick={this.handleAboutClick}
                 >
-                  New node
-                </a>
-                <a
-                  className="navbar-item"
-                  href="#"
-                  onClick={this.handleDeleteNodeClick}
-                >
-                  Delete node
+                  About
                 </a>
               </div>
             </>
@@ -111,6 +113,7 @@ export class MainComponent extends Component<Props, State> {
             allConnections={this.props.connections}
             onClose={this.handleCloseDetailsModal}
             onSave={this.handleGraphModification}
+            onRemoveObject={this.handleRemoveObjectClick}
           />
         )}
 
@@ -125,21 +128,21 @@ export class MainComponent extends Component<Props, State> {
           <div className="control-block">
             <button
               type="button"
-              className="button is-rounded is-medium"
-              onClick={this.handleNewNodeClick}
+              className="button round-borders is-medium"
+              onClick={this.handleNewObjectClick}
             >
               <span className="icon">
-                <span className="oi" data-glyph="plus" />
+                <IconPlus />
               </span>
             </button>
             {this.props.selectedObject && (
               <button
                 type="button"
-                className="button is-rounded is-medium"
+                className="button round-borders is-medium"
                 onClick={this.handleShowDetailsButtonClick}
               >
                 <span className="icon">
-                  <span className="oi" data-glyph="pencil" />
+                  <IconPencil />
                 </span>
               </button>
             )}

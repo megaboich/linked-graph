@@ -1,4 +1,5 @@
 export function getAmsterdamMetroGraphData() {
+  const name = "Amsterdam Metro";
   const points: string[] = [
     /* 50 */
     "Isolatorweg",
@@ -159,5 +160,5 @@ export function getAmsterdamMetroGraphData() {
     "Kraaiennest:Gaasperplas"
   ];
 
-  return { points, links };
+  return { name, points, links };
 }

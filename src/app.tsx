@@ -2,13 +2,14 @@
 import * as ReactDOM from "react-dom";
 import { Provider, connect } from "redux-zero/react";
 import "bulma/css/bulma.min.css";
-import "./ui/styles/open-iconic.css";
+
 import { ensure } from "./helpers/syntax";
 
 import { appStore } from "./services/store";
 import { actions } from "./services/actions";
 import { MainComponent } from "./ui/main.component";
 
+import "./ui/styles/shared.less";
 import "./app.less";
 
 const ConnectedMain = connect(
