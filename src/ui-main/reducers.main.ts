@@ -1,21 +1,22 @@
 import { getRandomName, getRandomNumber } from "src/helpers/random";
 
-import { AppState } from "./store";
-import { GraphObject, GraphConnection } from "./graph-model";
-import { saveGraphToLocalStorage } from "./data/graph-local-storage";
+import { AppState, MainState } from "../store";
+import { GraphObject, GraphConnection } from "../data/graph-model";
+import { saveGraphToLocalStorage } from "../data/graph-local-storage";
 
 import { ActionType, getType } from "typesafe-actions";
 
-import * as actionCreators from "./action-creators";
+import * as actionCreators from "./actions.main";
 type Action = ActionType<typeof actionCreators>;
 
-export function reducer(state: AppState | undefined, action: Action): AppState {
+export function reducers(
+  state: MainState | undefined,
+  action: Action
+): MainState {
   if (!state) {
-    throw new Error("State must be defined");
+    return null as any; //This effectively skips initial state because that is defined in the store initialization
   }
   switch (action.type) {
-    case getType(actionCreators.addObject):
-      return addObject(state);
     case getType(actionCreators.removeObject):
       return removeObject(state);
     case getType(actionCreators.loadGraph):
@@ -32,68 +33,19 @@ export function reducer(state: AppState | undefined, action: Action): AppState {
       );
     case getType(actionCreators.selectObject):
       return selectObject(state, action.payload);
-    case getType(actionCreators.toggleObjectDetails):
-      return toggleObjectDetails(state, action.payload);
     default:
       return state;
   }
 }
 
-function toggleObjectDetails(state: AppState, show: boolean): AppState {
-  return {
-    ...state,
-    showObjectDetails: show
-  };
-}
-
-function selectObject(state: AppState, object?: GraphObject): AppState {
+function selectObject(state: MainState, object?: GraphObject): MainState {
   return {
     ...state,
     selectedObject: object
   };
 }
 
-function addObject(state: AppState): AppState {
-  const prevObj =
-    state.objects.length >= 1
-      ? state.selectedObject || state.objects[state.objects.length - 1]
-      : undefined;
-
-  // Generate unique object Id
-  let randomId = getRandomName();
-  while (state.objects.some(x => x.id === randomId)) {
-    randomId = getRandomName();
-  }
-  const newObj: GraphObject = {
-    id: randomId,
-    label: randomId,
-    x: prevObj
-      ? prevObj.x + getRandomNumber(-50, 50)
-      : getRandomNumber(10, 590),
-    y: prevObj ? prevObj.y + getRandomNumber(-50, 50) : getRandomNumber(10, 390)
-  };
-  const objects = [...state.objects, newObj];
-  const connections = [...state.connections];
-
-  if (prevObj) {
-    const newConnection: GraphConnection = {
-      source: prevObj,
-      target: newObj
-    };
-    connections.push(newConnection);
-  }
-
-  const newState: AppState = {
-    ...state,
-    objects: objects,
-    connections: connections,
-    selectedObject: newObj
-  };
-  saveGraphToLocalStorage(newState);
-  return newState;
-}
-
-function removeObject(state: AppState): AppState {
+function removeObject(state: MainState): MainState {
   if (state.selectedObject) {
     const idToDelete = state.selectedObject.id;
     const objects = state.objects.filter(x => x.id != idToDelete);
@@ -101,7 +53,7 @@ function removeObject(state: AppState): AppState {
       x => x.source.id != idToDelete && x.target.id != idToDelete
     );
 
-    const newState: AppState = {
+    const newState: MainState = {
       ...state,
       objects: objects,
       connections: connections,
@@ -114,10 +66,10 @@ function removeObject(state: AppState): AppState {
 }
 
 function editObject(
-  state: AppState,
+  state: MainState,
   newObject: GraphObject,
   newConnections: GraphConnection[]
-): AppState {
+): MainState {
   // delete old Object and its Connections from state
   const objects = state.objects.filter(x => x.id !== newObject.id);
   const connections = state.connections.filter(
@@ -134,11 +86,16 @@ function editObject(
     }
   }
 
+  // If this a new object then we need to generate Id for it
+  if (!newObject.id) {
+    newObject.id = generateUniqueObjectId(state.objects);
+  }
+
   // add new Object and Fixed connections
   objects.push(newObject);
   connections.push(...newConnections);
 
-  const newState: AppState = {
+  const newState: MainState = {
     ...state,
     objects: objects,
     connections: connections,
@@ -150,15 +107,22 @@ function editObject(
 }
 
 function loadGraph(
-  state: AppState,
+  state: MainState,
   objects: GraphObject[],
   connections: GraphConnection[]
-): AppState {
+): MainState {
   return {
     ...state,
     objects: objects,
     connections: connections,
-    selectedObject: undefined,
-    showObjectDetails: false
+    selectedObject: undefined
   };
+}
+
+function generateUniqueObjectId(existingObjects: GraphObject[]): string {
+  let randomId = getRandomName();
+  while (existingObjects.some(x => x.id === randomId)) {
+    randomId = getRandomName();
+  }
+  return randomId;
 }

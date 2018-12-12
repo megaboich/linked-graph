@@ -1,5 +1,5 @@
 import { ensure } from "src/helpers/syntax";
-import { GraphObject, GraphModel, GraphConnection } from "../graph-model";
+import { GraphObject, GraphModel, GraphConnection } from "./graph-model";
 
 interface GraphLink {
   sourceId: string;

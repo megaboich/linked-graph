@@ -3,14 +3,14 @@ import { Component } from "react";
 import Select from "react-select";
 import * as cn from "classnames";
 
-import { GraphObject, GraphConnection } from "src/services/graph-model";
+import { GraphObject, GraphConnection } from "src/data/graph-model";
 
-import { ModalComponent } from "./common/modal.component";
-import { IconTrash } from "./common/icons/icon-trash";
-import { IconLoopSquare } from "./common/icons/icon-loop-square";
-import { IconPlus } from "./common/icons/icon-plus";
+import { ModalComponent } from "src/ui-components/modal.component";
+import { IconTrash } from "src/ui-components/icons/icon-trash";
+import { IconLoopSquare } from "src/ui-components/icons/icon-loop-square";
+import { IconPlus } from "src/ui-components/icons/icon-plus";
 
-import "./object-details-modal.component.less";
+import "./component.object-editor.less";
 
 type SelectOption = { value: string; label: string };
 
@@ -18,44 +18,53 @@ interface IComponentState {
   objectName: string;
   isNameInUse?: boolean;
   isNameEmpty?: boolean;
-  connections: Partial<GraphConnection>[];
 }
 
 interface IComponentProps {
+  isVisible: boolean;
   object: GraphObject;
+  connections: Partial<GraphConnection>[];
   allObjects: GraphObject[];
-  allConnections: GraphConnection[];
-  onClose(): void;
-  onSave(object: GraphObject, connections: GraphConnection[]): void;
-  onRemoveObject(): void;
+  removeObject(): void;
+  hideObjectEditor(): void;
+  editObject(newObject: GraphObject, newConnections: GraphConnection[]): void;
+  reverseConnection(connection: Partial<GraphConnection>): void;
+  addConnection(): void;
+  removeConnection(connection: Partial<GraphConnection>): void;
 }
 
-export class ObjectDetailsModalComponent extends Component<
+export class ObjectEditorComponent extends Component<
   IComponentProps,
   IComponentState
 > {
   constructor(props: IComponentProps) {
     super(props);
+  }
 
-    // Filter only related connections to object
-    const connections = props.allConnections
-      .filter(
-        x => x.source.id === props.object.id || x.target.id === props.object.id
-      )
-      .map(x => ({ ...x }));
-
-    this.state = {
-      objectName: props.object.label || props.object.id,
-      connections: connections
-    };
+  componentWillReceiveProps(newProps: IComponentProps) {
+    const newObj = newProps.object;
+    if (newObj !== this.props.object) {
+      this.setState({
+        objectName: newObj ? newObj.label || newObj.id : "",
+        isNameEmpty: false,
+        isNameInUse: false
+      });
+    }
   }
 
   handleCloseModal = () => {
-    this.props.onClose();
+    this.props.hideObjectEditor();
   };
 
   handleObjectNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
+    this.setState({
+      objectName: newName
+    });
+  };
+
+  handleObjectNameBlur = () => {
+    const newName = this.state.objectName;
     const objId = this.props.object.id;
     const isNameInUse = this.props.allObjects.some(
       x =>
@@ -63,7 +72,6 @@ export class ObjectDetailsModalComponent extends Component<
           newName.trim().toLowerCase() && x.id !== objId
     );
     this.setState({
-      objectName: newName,
       isNameEmpty: !newName.trim(),
       isNameInUse: isNameInUse
     });
@@ -74,7 +82,7 @@ export class ObjectDetailsModalComponent extends Component<
     newObject.label = this.state.objectName;
 
     const connections: GraphConnection[] = [];
-    for (const c of this.state.connections) {
+    for (const c of this.props.connections) {
       if (c.source && c.target) {
         connections.push({
           source: c.source,
@@ -83,42 +91,33 @@ export class ObjectDetailsModalComponent extends Component<
       }
     }
 
-    this.props.onSave(newObject, connections);
-    this.props.onClose();
+    this.props.editObject(newObject, connections);
+    this.props.hideObjectEditor();
   };
 
   handleAddConnectionClick = () => {
-    const newConnection: Partial<GraphConnection> = {
-      source: this.props.object
-    };
-    this.setState({
-      connections: [...this.state.connections, newConnection]
-    });
+    this.props.addConnection();
   };
 
   handleReverseConnectionClick = (connection: Partial<GraphConnection>) => {
-    const newConnection: Partial<GraphConnection> = {
-      source: connection.target,
-      target: connection.source
-    };
-    const index = this.state.connections.indexOf(connection);
-    if (index >= 0) {
-      const connections = this.state.connections.slice();
-      connections.splice(index, 1, newConnection);
-      this.setState({ connections });
-    }
+    this.props.reverseConnection(connection);
   };
 
   handleRemoveConnectionClick = (connection: Partial<GraphConnection>) => {
-    const connections = this.state.connections.filter(x => x !== connection);
-    this.setState({ connections });
+    this.props.removeConnection(connection);
   };
 
   handleRemoveObjectClick = () => {
-    this.props.onRemoveObject();
+    this.props.removeObject();
+    this.props.hideObjectEditor();
   };
 
   render(): JSX.Element {
+    if (!this.props.isVisible) {
+      return <div />;
+    }
+    const currentObjId = this.props.object.id;
+
     const hasError = this.state.isNameInUse || this.state.isNameEmpty;
     let errorText = "";
     if (this.state.isNameInUse) {
@@ -129,19 +128,22 @@ export class ObjectDetailsModalComponent extends Component<
     }
 
     const objectsOptions: SelectOption[] = this.props.allObjects
-      .filter(x => x.id !== this.props.object.id)
+      .filter(x => x.id !== currentObjId)
       .map(x => ({
         value: x.id,
         label: x.label || x.id
       }));
 
+    const isAddNewObject = !this.props.object.id;
+    const title = isAddNewObject ? "Add new object" : "Edit object";
+
     return (
       <ModalComponent
-        title="Object details"
+        title={title}
         show
         onClose={this.handleCloseModal}
         body={
-          <div className="object-details-modal-body">
+          <div className="object-editor-modal-body">
             <div className="field">
               <label className="label">Object name</label>
               <div className="control has-icons-right">
@@ -149,8 +151,10 @@ export class ObjectDetailsModalComponent extends Component<
                   className={cn("input", { "is-danger": hasError })}
                   type="text"
                   placeholder="Name of object"
+                  autoFocus
                   value={this.state.objectName}
                   onChange={this.handleObjectNameChange}
+                  onBlur={this.handleObjectNameBlur}
                 />
                 {hasError && (
                   <span className="icon is-small is-right">
@@ -162,7 +166,7 @@ export class ObjectDetailsModalComponent extends Component<
             </div>
             <div className="field">
               <div className="connections-container">
-                {this.state.connections.map((connection, index) => (
+                {this.props.connections.map((connection, index) => (
                   <React.Fragment key={index}>
                     {this.renderConnectionRow(connection, objectsOptions)}
                   </React.Fragment>
@@ -183,14 +187,17 @@ export class ObjectDetailsModalComponent extends Component<
           </div>
         }
         headerButtons={
-          <button
-            className="button round-borders is-danger is-outlined margin-right-small"
-            onClick={this.handleRemoveObjectClick}
-          >
-            <span className="icon">
-              <IconTrash />
-            </span>
-          </button>
+          !isAddNewObject && (
+            <button
+              title="Delete this object"
+              className="button round-borders is-danger is-outlined margin-right-small"
+              onClick={this.handleRemoveObjectClick}
+            >
+              <span className="icon">
+                <IconTrash />
+              </span>
+            </button>
+          )
         }
         footerButtons={
           <button
@@ -209,53 +216,47 @@ export class ObjectDetailsModalComponent extends Component<
     connection: Partial<GraphConnection>,
     objectsOptions: SelectOption[]
   ) {
+    if (!this.props.object) {
+      return;
+    }
     return (
       <div className="connection">
         <div className="media">
           <div className="media-content">
             <div className="connection-content">
               {connection.source &&
-                connection.source.id === this.props.object.id && (
-                  <>
-                    <div className="self-object-name">
-                      {this.state.objectName}
-                    </div>
+              connection.source.id === this.props.object.id ? (
+                <div className="self-object-name">
+                  {this.state.objectName || "This object"}
+                </div>
+              ) : (
+                this.renderObjectSelector({
+                  allObjects: objectsOptions,
+                  objId: connection.source ? connection.source.id : undefined,
+                  onSelect: newObj => {
+                    connection.source = newObj;
+                    this.forceUpdate();
+                  }
+                })
+              )}
 
-                    {this.renderLinkSelector()}
+              {this.renderLinkSelector()}
 
-                    {this.renderObjectSelector({
-                      allObjects: objectsOptions,
-                      objId: connection.target
-                        ? connection.target.id
-                        : undefined,
-                      onSelect: newObj => {
-                        connection.target = newObj;
-                        this.forceUpdate();
-                      }
-                    })}
-                  </>
-                )}
               {connection.target &&
-                connection.target.id === this.props.object.id && (
-                  <>
-                    {this.renderObjectSelector({
-                      allObjects: objectsOptions,
-                      objId: connection.source
-                        ? connection.source.id
-                        : undefined,
-                      onSelect: newObj => {
-                        connection.source = newObj;
-                        this.forceUpdate();
-                      }
-                    })}
-
-                    {this.renderLinkSelector()}
-
-                    <div className="self-object-name">
-                      {this.state.objectName}
-                    </div>
-                  </>
-                )}
+              connection.target.id === this.props.object.id ? (
+                <div className="self-object-name">
+                  {this.state.objectName || "This object"}
+                </div>
+              ) : (
+                this.renderObjectSelector({
+                  allObjects: objectsOptions,
+                  objId: connection.target ? connection.target.id : undefined,
+                  onSelect: newObj => {
+                    connection.target = newObj;
+                    this.forceUpdate();
+                  }
+                })
+              )}
             </div>
           </div>
           <div className="media-right">

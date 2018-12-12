@@ -1,4 +1,4 @@
-import { GraphModel } from "../graph-model";
+import { GraphModel } from "./graph-model";
 import { deserializeGraph, serializeGraph } from "./graph-serializer";
 import { getSamples } from "./data-loader";
 

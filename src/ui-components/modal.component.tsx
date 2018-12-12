@@ -9,8 +9,8 @@ interface IComponentProps {
   title: string;
   show: boolean;
   body: JSX.Element;
-  footerButtons?: JSX.Element;
-  headerButtons?: JSX.Element;
+  footerButtons?: JSX.Element | false;
+  headerButtons?: JSX.Element | false;
   width?: "default" | "medium" | "wide";
   onClose(): void;
   hideFooter?: boolean;

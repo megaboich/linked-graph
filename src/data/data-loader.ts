@@ -1,12 +1,7 @@
 import { getRandomNumber } from "src/helpers/random";
-import {
-  GraphObject,
-  GraphConnection,
-  GraphModel
-} from "src/services/graph-model";
+import { GraphObject, GraphConnection, GraphModel } from "./graph-model";
 import { getAmsterdamMetroGraphData } from "./sample-data-amsterdam-metro";
 import { getCircleGraphData } from "./sample-data-circle";
-import { getDefaultGraphData } from "./sample-default-graph";
 import { getUrsaMajorGraphData } from "./sample-ursa-major";
 
 export interface GraphSample {
@@ -52,10 +47,9 @@ function buildGraphFromData(points: string[], links: string[]) {
 
 export function getSamples(): GraphSample[] {
   const graphs = [
-    getDefaultGraphData(),
     getCircleGraphData(),
-    getAmsterdamMetroGraphData(),
-    getUrsaMajorGraphData()
+    getUrsaMajorGraphData(),
+    getAmsterdamMetroGraphData()
   ];
   return graphs.map(data => {
     const sample: GraphSample = {
