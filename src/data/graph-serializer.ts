@@ -4,6 +4,7 @@ import { GraphObject, GraphModel, GraphConnection } from "./graph-model";
 interface GraphLink {
   sourceId: string;
   targetId: string;
+  relation: string | undefined;
 }
 
 interface SerializedGraphData {
@@ -27,7 +28,8 @@ export function serializeGraph(graph: GraphModel): string {
   const links = graph.connections.map(x => {
     const link: GraphLink = {
       sourceId: x.source.id,
-      targetId: x.target.id
+      targetId: x.target.id,
+      relation: x.relation
     };
     return link;
   });
@@ -52,7 +54,11 @@ export function deserializeGraph(serializedGraph: string): GraphModel {
     for (const link of links) {
       const source = ensure(objects.find(x => x.id === link.sourceId));
       const target = ensure(objects.find(x => x.id === link.targetId));
-      connections.push({ source, target });
+      connections.push({
+        source,
+        target,
+        relation: link.relation || "related to"
+      });
     }
 
     return {

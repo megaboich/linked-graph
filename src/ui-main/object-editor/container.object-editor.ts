@@ -6,10 +6,11 @@ import { ObjectEditorComponent } from "./component.object-editor";
 
 export const ObjectEditorComponentContainer = connect(
   (state: AppState) => ({
-    allObjects: state.main.objects,
     isVisible: state.objectEditor.showEditor,
     object: state.objectEditor.object!,
-    connections: state.objectEditor ? state.objectEditor.connections : []
+    connections: state.objectEditor ? state.objectEditor.connections : [],
+    allObjects: state.main.objects,
+    allConnections: state.main.connections
   }),
   {
     removeObject: mainActionCreators.removeObject,

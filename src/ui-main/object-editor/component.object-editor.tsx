@@ -1,10 +1,11 @@
 import * as React from "react";
 import { Component } from "react";
 import Select from "react-select";
+import CreatableSelect from "react-select/lib/Creatable";
 import * as cn from "classnames";
+import { ensure } from "src/helpers/syntax";
 
 import { GraphObject, GraphConnection } from "src/data/graph-model";
-
 import { ModalComponent } from "src/ui-components/modal.component";
 import { IconTrash } from "src/ui-components/icons/icon-trash";
 import { IconLoopSquare } from "src/ui-components/icons/icon-loop-square";
@@ -18,6 +19,7 @@ interface IComponentState {
   objectName: string;
   isNameInUse?: boolean;
   isNameEmpty?: boolean;
+  relationOptions: SelectOption[];
 }
 
 interface IComponentProps {
@@ -25,6 +27,7 @@ interface IComponentProps {
   object: GraphObject;
   connections: Partial<GraphConnection>[];
   allObjects: GraphObject[];
+  allConnections: GraphConnection[];
   removeObject(): void;
   hideObjectEditor(): void;
   editObject(newObject: GraphObject, newConnections: GraphConnection[]): void;
@@ -39,15 +42,33 @@ export class ObjectEditorComponent extends Component<
 > {
   constructor(props: IComponentProps) {
     super(props);
+    this.state = {
+      objectName: "",
+      relationOptions: []
+    };
   }
 
   componentWillReceiveProps(newProps: IComponentProps) {
     const newObj = newProps.object;
     if (newObj !== this.props.object) {
+      // extract all unique relation types from graph
+      const allRelations = Array.from(
+        new Set([
+          ...newProps.allConnections.map(x => x.relation),
+          ...newProps.connections.map(x => x.relation)
+        ])
+      );
+
       this.setState({
         objectName: newObj ? newObj.label || newObj.id : "",
         isNameEmpty: false,
-        isNameInUse: false
+        isNameInUse: false,
+        relationOptions: allRelations
+          .filter(x => !!x)
+          .map(x => ({
+            label: ensure(x),
+            value: ensure(x)
+          }))
       });
     }
   }
@@ -86,7 +107,8 @@ export class ObjectEditorComponent extends Component<
       if (c.source && c.target) {
         connections.push({
           source: c.source,
-          target: c.target
+          target: c.target,
+          relation: c.relation || "related to"
         });
       }
     }
@@ -240,7 +262,7 @@ export class ObjectEditorComponent extends Component<
                 })
               )}
 
-              {this.renderLinkSelector()}
+              {this.renderLinkSelector(connection)}
 
               {connection.target &&
               connection.target.id === this.props.object.id ? (
@@ -323,16 +345,33 @@ export class ObjectEditorComponent extends Component<
     );
   }
 
-  renderLinkSelector() {
-    const linkOptions: SelectOption[] = [
-      { value: "related_to", label: "related to" }
-    ];
+  renderLinkSelector(connection: Partial<GraphConnection>) {
+    const handleCreate = (inputValue: string) => {
+      connection.relation = inputValue;
+      this.setState({
+        relationOptions: [
+          { label: inputValue, value: inputValue },
+          ...this.state.relationOptions
+        ]
+      });
+    };
+
+    const selectedValue = this.state.relationOptions.find(
+      x => x.value === connection.relation
+    );
+
     return (
-      <Select
+      <CreatableSelect
         className="link-selector"
-        value={linkOptions[0]}
-        onChange={newValue => {}}
-        options={linkOptions}
+        value={selectedValue}
+        onChange={newValue => {
+          if (newValue && !Array.isArray(newValue)) {
+            connection.relation = newValue.value;
+          }
+          this.forceUpdate();
+        }}
+        onCreateOption={handleCreate}
+        options={this.state.relationOptions}
         menuPortalTarget={document.body}
         menuPosition="fixed"
         menuPlacement="bottom"

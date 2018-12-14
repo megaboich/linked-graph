@@ -1,5 +1,6 @@
 export function getUrsaMajorGraphData() {
   const name = "Ursa Major";
+  const relation = "connected to";
 
   const points: string[] = [
     "Alkaid",
@@ -21,5 +22,5 @@ export function getUrsaMajorGraphData() {
     "Phecda:Megrez"
   ];
 
-  return { name, points, links };
+  return { name, points, links, relation };
 }

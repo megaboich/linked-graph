@@ -14,4 +14,5 @@ export interface GraphNode {
 export interface GraphLink {
   source: GraphNode;
   target: GraphNode;
+  relation: string;
 }

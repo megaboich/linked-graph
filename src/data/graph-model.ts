@@ -10,6 +10,7 @@ export interface GraphObject {
 export interface GraphConnection {
   source: GraphObject;
   target: GraphObject;
+  relation: string;
 }
 
 export interface GraphModel {

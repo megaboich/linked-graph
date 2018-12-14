@@ -40,7 +40,7 @@ export class GraphColaLayout extends cola.Layout {
       .links(options.links)
       .convergenceThreshold(0.05)
       .size([options.width, options.height])
-      .jaccardLinkLengths(50, 0.7)
+      .jaccardLinkLengths(70, 0.7)
       //.linkDistance(50)
       .avoidOverlaps(true)
       //.flowLayout("x", 50)

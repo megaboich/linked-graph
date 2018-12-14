@@ -31,7 +31,8 @@ export const createNewObject = createAction(
     if (selectedObject) {
       connections.push({
         source: selectedObject,
-        target: newObject
+        target: newObject,
+        relation: "related to"
       });
     }
     return resolve({

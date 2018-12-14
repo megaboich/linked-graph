@@ -7,6 +7,7 @@ import { getRandomWord } from "src/helpers/random";
 import { GraphNode, GraphLink } from "./graph-objects";
 import { NodeComponent } from "./node.component";
 import { LinkComponent } from "./link.component";
+import { LinkTextComponent } from "./link-text.component";
 import { GraphColaLayout } from "./graph-cola-layout";
 
 import "./graph.component.less";
@@ -243,6 +244,12 @@ export class GraphComponent extends Component<Props, State> {
               <g transform={`translate(${width / 2}, ${height / 2})`}>
                 {this.props.links.map(link => (
                   <LinkComponent
+                    key={link.source.id + "-" + link.target.id}
+                    link={link}
+                  />
+                ))}
+                {this.props.links.map(link => (
+                  <LinkTextComponent
                     key={link.source.id + "-" + link.target.id}
                     link={link}
                   />

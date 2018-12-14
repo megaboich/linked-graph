@@ -16,7 +16,11 @@ function getRandomCoordinates() {
   };
 }
 
-function buildGraphFromData(points: string[], links: string[]) {
+function buildGraphFromData(
+  points: string[],
+  links: string[],
+  relation: string
+) {
   const objects = points.map(s => {
     const object: GraphObject = {
       id: s,
@@ -37,7 +41,8 @@ function buildGraphFromData(points: string[], links: string[]) {
     }
     const connection: GraphConnection = {
       source,
-      target
+      target,
+      relation
     };
     return connection;
   });
@@ -55,7 +60,7 @@ export function getSamples(): GraphSample[] {
     const sample: GraphSample = {
       name: data.name,
       getGraph: () => {
-        return buildGraphFromData(data.points, data.links);
+        return buildGraphFromData(data.points, data.links, data.relation);
       }
     };
     return sample;
