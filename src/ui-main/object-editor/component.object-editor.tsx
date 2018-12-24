@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Component } from "react";
-import Select from "react-select";
 import CreatableSelect from "react-select/lib/Creatable";
 import * as cn from "classnames";
 import { ensure } from "src/helpers/syntax";
@@ -13,13 +12,14 @@ import { IconPlus } from "src/ui-components/icons/icon-plus";
 
 import "./component.object-editor.less";
 
-type SelectOption = { value: string; label: string };
+type SelectOption<T> = { value: T; label: string };
 
 interface IComponentState {
   objectName: string;
   isNameInUse?: boolean;
   isNameEmpty?: boolean;
-  relationOptions: SelectOption[];
+  relationOptions: SelectOption<string>[];
+  objectOptions: SelectOption<GraphObject>[];
 }
 
 interface IComponentProps {
@@ -44,13 +44,14 @@ export class ObjectEditorComponent extends Component<
     super(props);
     this.state = {
       objectName: "",
-      relationOptions: []
+      relationOptions: [],
+      objectOptions: []
     };
   }
 
   componentWillReceiveProps(newProps: IComponentProps) {
     const newObj = newProps.object;
-    if (newObj !== this.props.object) {
+    if (newObj && newObj !== this.props.object) {
       // extract all unique relation types from graph
       const allRelations = Array.from(
         new Set([
@@ -58,6 +59,13 @@ export class ObjectEditorComponent extends Component<
           ...newProps.connections.map(x => x.relation)
         ])
       );
+
+      const objectOptions: SelectOption<GraphObject>[] = newProps.allObjects
+        .filter(x => x.id !== newProps.object.id)
+        .map(x => ({
+          value: x,
+          label: x.label || x.id
+        }));
 
       this.setState({
         objectName: newObj ? newObj.label || newObj.id : "",
@@ -68,7 +76,8 @@ export class ObjectEditorComponent extends Component<
           .map(x => ({
             label: ensure(x),
             value: ensure(x)
-          }))
+          })),
+        objectOptions
       });
     }
   }
@@ -86,11 +95,8 @@ export class ObjectEditorComponent extends Component<
 
   handleObjectNameBlur = () => {
     const newName = this.state.objectName;
-    const objId = this.props.object.id;
-    const isNameInUse = this.props.allObjects.some(
-      x =>
-        (x.label || x.id).trim().toLowerCase() ===
-          newName.trim().toLowerCase() && x.id !== objId
+    const isNameInUse = this.state.objectOptions.some(
+      x => x.label.trim().toLowerCase() === newName.trim().toLowerCase()
     );
     this.setState({
       isNameEmpty: !newName.trim(),
@@ -106,8 +112,8 @@ export class ObjectEditorComponent extends Component<
     for (const c of this.props.connections) {
       if (c.source && c.target) {
         connections.push({
-          source: c.source,
-          target: c.target,
+          source: c.source === this.props.object ? newObject : c.source,
+          target: c.target === this.props.object ? newObject : c.target,
           relation: c.relation || "related to"
         });
       }
@@ -138,7 +144,6 @@ export class ObjectEditorComponent extends Component<
     if (!this.props.isVisible) {
       return <div />;
     }
-    const currentObjId = this.props.object.id;
 
     const hasError = this.state.isNameInUse || this.state.isNameEmpty;
     let errorText = "";
@@ -148,13 +153,6 @@ export class ObjectEditorComponent extends Component<
     if (this.state.isNameEmpty) {
       errorText = "Object must have name specified";
     }
-
-    const objectsOptions: SelectOption[] = this.props.allObjects
-      .filter(x => x.id !== currentObjId)
-      .map(x => ({
-        value: x.id,
-        label: x.label || x.id
-      }));
 
     const isAddNewObject = !this.props.object.id;
     const title = isAddNewObject ? "Add new object" : "Edit object";
@@ -190,7 +188,7 @@ export class ObjectEditorComponent extends Component<
               <div className="connections-container">
                 {this.props.connections.map((connection, index) => (
                   <React.Fragment key={index}>
-                    {this.renderConnectionRow(connection, objectsOptions)}
+                    {this.renderConnectionRow(connection)}
                   </React.Fragment>
                 ))}
               </div>
@@ -234,10 +232,7 @@ export class ObjectEditorComponent extends Component<
     );
   }
 
-  renderConnectionRow(
-    connection: Partial<GraphConnection>,
-    objectsOptions: SelectOption[]
-  ) {
+  renderConnectionRow(connection: Partial<GraphConnection>) {
     if (!this.props.object) {
       return;
     }
@@ -246,15 +241,13 @@ export class ObjectEditorComponent extends Component<
         <div className="media">
           <div className="media-content">
             <div className="connection-content">
-              {connection.source &&
-              connection.source.id === this.props.object.id ? (
+              {connection.source && connection.source === this.props.object ? (
                 <div className="self-object-name">
                   {this.state.objectName || "This object"}
                 </div>
               ) : (
                 this.renderObjectSelector({
-                  allObjects: objectsOptions,
-                  objId: connection.source ? connection.source.id : undefined,
+                  object: connection.source,
                   onSelect: newObj => {
                     connection.source = newObj;
                     this.forceUpdate();
@@ -264,15 +257,13 @@ export class ObjectEditorComponent extends Component<
 
               {this.renderLinkSelector(connection)}
 
-              {connection.target &&
-              connection.target.id === this.props.object.id ? (
+              {connection.target && connection.target === this.props.object ? (
                 <div className="self-object-name">
                   {this.state.objectName || "This object"}
                 </div>
               ) : (
                 this.renderObjectSelector({
-                  allObjects: objectsOptions,
-                  objId: connection.target ? connection.target.id : undefined,
+                  object: connection.target,
                   onSelect: newObj => {
                     connection.target = newObj;
                     this.forceUpdate();
@@ -315,26 +306,48 @@ export class ObjectEditorComponent extends Component<
   }
 
   renderObjectSelector(options: {
-    objId: string | undefined;
-    allObjects: SelectOption[];
+    object: GraphObject | undefined;
     onSelect: (newObj: GraphObject) => void;
   }) {
+    const handleCreate = (inputValue: string) => {
+      const newObject: GraphObject = {
+        label: inputValue,
+        id: "",
+        x: 0,
+        y: 0
+      };
+      const newOption: SelectOption<GraphObject> = {
+        label: inputValue,
+        value: newObject
+      };
+      const newObjOptions = [newOption, ...this.state.objectOptions];
+      this.setState({
+        objectOptions: newObjOptions
+      });
+      options.onSelect(newObject);
+    };
+
     return (
-      <Select
+      <CreatableSelect
         className="object-selector"
-        value={options.allObjects.find(x => x.value === options.objId)}
+        value={this.state.objectOptions.find(x => x.value === options.object)}
         onChange={newValue => {
           if (newValue && !Array.isArray(newValue)) {
-            const newTarget = this.props.allObjects.find(
-              x => x.id === newValue.value
-            );
-            if (newTarget) {
-              options.onSelect(newTarget);
-            }
+            options.onSelect(newValue.value);
           }
           this.forceUpdate();
         }}
-        options={options.allObjects}
+        onCreateOption={handleCreate}
+        isValidNewOption={inputValue => {
+          if (inputValue) {
+            const exist = this.state.objectOptions.some(
+              x => x.label === inputValue.trim()
+            );
+            return !exist;
+          }
+          return false;
+        }}
+        options={this.state.objectOptions}
         menuPortalTarget={document.body}
         menuPosition="fixed"
         menuPlacement="bottom"

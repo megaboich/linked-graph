@@ -40,25 +40,25 @@ export class LinkTextComponent extends Component<Props, State> {
     const y2 = link.target.y;
 
     /**
-     * Calculation of middle coordinates of a link to put text there
-     */
-    const mx = Math.round((x1 + x2) / 2);
-    const my = Math.round((y1 + y2) / 2);
-
-    /**
-     * Calculation of link angle, so we rotate text with it
+     * Calculation of point coordinates on the link to put text there
      */
     const dx = x1 - x2;
     const dy = y1 - y2;
+    const tx = Math.round(x1 - 0.46 * dx);
+    const ty = Math.round(y1 - 0.46 * dy);
+
+    const lineLength = Math.sqrt(dx * dx + dy * dy);
+    if (lineLength < 10) {
+      // skip render in case the link is too short
+      return <React.Fragment />;
+    }
+
+    /**
+     * Calculation of link angle, so we rotate text properly
+     */
     let angle = Math.atan2(dx, -dy) * (180 / Math.PI) + 90;
     if (angle < -90 || angle > 90) {
       angle += 180;
-    }
-
-    const lineLength = Math.sqrt(dx * dx + dy * dy);
-    if (lineLength < 5) {
-      // return empty in case the link is too short
-      return <React.Fragment />;
     }
 
     /**
@@ -77,14 +77,14 @@ export class LinkTextComponent extends Component<Props, State> {
     }
 
     /**
-     * Calculating coordinates for text background line (because in SVG we can't set non-transparent background to text)
+     * Calculating coordinates for text background line (because SVG can't set non-transparent background to text)
      */
     const bgLineLenX = (dx * textLength) / lineLength;
     const bgLineLenY = (dy * textLength) / lineLength;
-    const bgLineX1 = Math.round(x1 - dx / 2 - bgLineLenX / 2);
-    const bgLineX2 = Math.round(x1 - dx / 2 + bgLineLenX / 2);
-    const bgLineY1 = Math.round(y1 - dy / 2 - bgLineLenY / 2);
-    const bgLineY2 = Math.round(y1 - dy / 2 + bgLineLenY / 2);
+    const bgLineX1 = Math.round(tx - bgLineLenX / 2);
+    const bgLineX2 = Math.round(tx + bgLineLenX / 2);
+    const bgLineY1 = Math.round(ty - bgLineLenY / 2);
+    const bgLineY2 = Math.round(ty + bgLineLenY / 2);
 
     return (
       <>
@@ -99,9 +99,9 @@ export class LinkTextComponent extends Component<Props, State> {
           className="graph-link-text"
           textAnchor="middle"
           alignmentBaseline="middle"
-          transform={`rotate(${angle},${mx},${my})`}
-          x={mx}
-          y={my}
+          transform={`rotate(${angle},${tx},${ty})`}
+          x={tx}
+          y={ty}
         >
           {textToRender}
         </text>

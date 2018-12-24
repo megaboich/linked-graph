@@ -7,6 +7,7 @@ import { saveGraphToLocalStorage } from "../data/graph-local-storage";
 import { ActionType, getType } from "typesafe-actions";
 
 import * as actionCreators from "./actions.main";
+import { object } from "prop-types";
 type Action = ActionType<typeof actionCreators>;
 
 export function reducers(
@@ -84,15 +85,29 @@ function editObject(
     if (connection.target.id === newObject.id) {
       connection.target = newObject;
     }
+    if (!connection.source.id) {
+      connection.source.id = generateUniqueObjectId(objects);
+      connection.source.x = connection.target.x;
+      connection.source.y = connection.target.y;
+      objects.push(connection.source);
+    }
+    if (!connection.target.id) {
+      connection.target.id = generateUniqueObjectId(objects);
+      connection.target.x = connection.source.x;
+      connection.target.y = connection.source.y;
+      objects.push(connection.target);
+    }
   }
 
   // If this a new object then we need to generate Id for it
   if (!newObject.id) {
-    newObject.id = generateUniqueObjectId(state.objects);
+    newObject.id = generateUniqueObjectId(objects);
   }
 
   // add new Object and Fixed connections
-  objects.push(newObject);
+  if (!objects.includes(newObject)) {
+    objects.push(newObject);
+  }
   connections.push(...newConnections);
 
   const newState: MainState = {

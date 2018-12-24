@@ -3,6 +3,7 @@ import { GraphObject, GraphConnection, GraphModel } from "./graph-model";
 import { getAmsterdamMetroGraphData } from "./sample-data-amsterdam-metro";
 import { getCircleGraphData } from "./sample-data-circle";
 import { getUrsaMajorGraphData } from "./sample-ursa-major";
+import { get2ObjectsGraphData } from "./sample-data-2-objects";
 
 export interface GraphSample {
   name: string;
@@ -53,6 +54,7 @@ function buildGraphFromData(
 export function getSamples(): GraphSample[] {
   const graphs = [
     getCircleGraphData(),
+    get2ObjectsGraphData(),
     getUrsaMajorGraphData(),
     getAmsterdamMetroGraphData()
   ];
