@@ -9,13 +9,15 @@ export const MainContainer = connect(
   (state: AppState) => ({
     objects: state.main.objects,
     connections: state.main.connections,
-    selectedObject: state.main.selectedObject
+    selectedObject: state.main.selectedObject,
+    options: state.main.options
   }),
   // Map actions
   {
     selectObject: actionCreatorsMain.selectObject,
     addObject: actionCreatorsObjectEditor.createNewObject,
     showObjectEditor: actionCreatorsObjectEditor.showObjectEditor,
-    loadGraph: actionCreatorsMain.loadGraph
+    loadGraph: actionCreatorsMain.loadGraph,
+    setOptions: actionCreatorsMain.setOptions
   }
 )(MainComponent);

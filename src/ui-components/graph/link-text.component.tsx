@@ -7,6 +7,7 @@ export interface State {}
 
 export interface Props {
   link: GraphLink;
+  drawArrow: boolean;
 }
 
 export class LinkTextComponent extends Component<Props, State> {
@@ -56,9 +57,9 @@ export class LinkTextComponent extends Component<Props, State> {
     /**
      * Calculation of link angle, so we rotate text properly
      */
-    let angle = Math.atan2(dx, -dy) * (180 / Math.PI) + 90;
-    if (angle < -90 || angle > 90) {
-      angle += 180;
+    let angle = 90 - Math.atan2(dx, dy) * (180 / Math.PI);
+    if (angle > 90) {
+      angle -= 180;
     }
 
     /**
@@ -88,6 +89,14 @@ export class LinkTextComponent extends Component<Props, State> {
 
     return (
       <>
+        <line
+          className="graph-link"
+          x1={Math.round(x1)}
+          y1={Math.round(y1)}
+          x2={Math.round(x2)}
+          y2={Math.round(y2)}
+          markerEnd={props.drawArrow ? "url(#marker-arrowend)" : undefined}
+        />
         <line
           className="graph-link-text-bg"
           x1={bgLineX1}

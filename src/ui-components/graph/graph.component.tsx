@@ -37,6 +37,10 @@ export interface Props {
   selectedNode?: GraphNode;
   onSelectNode(node?: GraphNode): void;
   onDoubleClickNode?(node: GraphNode): void;
+  drawLinkText: boolean;
+  drawLinkArrows: boolean;
+  useForce: boolean;
+  forceLinkLength: number;
 }
 
 export class GraphComponent extends Component<Props, State> {
@@ -69,7 +73,8 @@ export class GraphComponent extends Component<Props, State> {
       height,
       nodes: this.props.nodes,
       links: this.props.links,
-      firstInit: true
+      enable: this.props.useForce,
+      forceLinkLength: this.props.forceLinkLength
     });
 
     window.addEventListener("resize", this.handleWindowResize);
@@ -78,14 +83,17 @@ export class GraphComponent extends Component<Props, State> {
   componentWillReceiveProps(newProps: Props) {
     if (
       newProps.nodes !== this.props.nodes ||
-      newProps.links !== this.props.links
+      newProps.links !== this.props.links ||
+      newProps.useForce !== this.props.useForce ||
+      newProps.forceLinkLength !== this.props.forceLinkLength
     ) {
       this.layout.init({
         width: this.state.width,
         height: this.state.height,
         nodes: newProps.nodes,
         links: newProps.links,
-        firstInit: false
+        enable: newProps.useForce,
+        forceLinkLength: newProps.forceLinkLength
       });
     }
   }
@@ -216,7 +224,7 @@ export class GraphComponent extends Component<Props, State> {
           "is-mouse-down": this.state.mouseDown
         })}
       >
-        {this.layout.isLayoutCalculated ? (
+        {this.layout.isLayoutCalculated && (
           <svg
             style={{ width, height }}
             onMouseDown={this.handleGraphMouseDown}
@@ -242,18 +250,22 @@ export class GraphComponent extends Component<Props, State> {
               transform={`scale(${cameraZoom}) translate(${translateX}, ${translateY})`}
             >
               <g transform={`translate(${width / 2}, ${height / 2})`}>
-                {this.props.links.map(link => (
-                  <LinkComponent
-                    key={link.source.id + "-" + link.target.id}
-                    link={link}
-                  />
-                ))}
-                {this.props.links.map(link => (
-                  <LinkTextComponent
-                    key={link.source.id + "-" + link.target.id}
-                    link={link}
-                  />
-                ))}
+                {this.props.drawLinkText
+                  ? this.props.links.map(link => (
+                      <LinkTextComponent
+                        key={link.source.id + "-" + link.target.id}
+                        link={link}
+                        drawArrow={this.props.drawLinkArrows}
+                      />
+                    ))
+                  : this.props.links.map(link => (
+                      <LinkComponent
+                        key={link.source.id + "-" + link.target.id}
+                        link={link}
+                        drawArrow={this.props.drawLinkArrows}
+                      />
+                    ))}
+
                 {this.props.nodes.map(node => (
                   <NodeComponent
                     key={node.id}
@@ -266,8 +278,6 @@ export class GraphComponent extends Component<Props, State> {
               </g>
             </g>
           </svg>
-        ) : (
-          <span />
         )}
       </div>
     );

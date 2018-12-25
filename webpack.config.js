@@ -2,6 +2,7 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer")
   .BundleAnalyzerPlugin;
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin");
 
 module.exports = function(env) {
@@ -33,6 +34,7 @@ module.exports = function(env) {
         filename: "index.html"
       }),
       new ForkTsCheckerWebpackPlugin(),
+      new CopyWebpackPlugin([{ from: "src/static", to: "static" }]),
       isProduction &&
         new BundleAnalyzerPlugin({
           // Can be `server`, `static` or `disabled`.

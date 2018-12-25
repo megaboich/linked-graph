@@ -61,7 +61,8 @@ function reverseConnection(
 ): ObjectEditorState {
   const newConnection: Partial<GraphConnection> = {
     source: connection.target,
-    target: connection.source
+    target: connection.source,
+    relation: connection.relation
   };
   const index = state.connections.indexOf(connection);
   if (index >= 0) {

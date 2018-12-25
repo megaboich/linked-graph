@@ -1,17 +1,26 @@
 import * as React from "react";
 import { NavbarComponent } from "src/ui-components/navbar.component";
 import { GraphSample } from "src/data/data-loader";
+import { IconGraph } from "src/ui-components/icons/icon-graph";
 
 interface Props {
   samples: GraphSample[];
   onAboutClick(): void;
+  onOptionsClick(): void;
   onLoadSampleClick(sample: GraphSample): void;
 }
 
 export function TopNavBarComponent(props: Props): JSX.Element {
   return (
     <NavbarComponent
-      brandContent={<span className="navbar-item">Linked graph</span>}
+      brandContent={
+        <span className="navbar-item">
+          <span className="icon is-medium">
+            <IconGraph />
+          </span>
+          <span>Linked graph</span>
+        </span>
+      }
       menuContent={
         <>
           <div className="navbar-end">
@@ -29,6 +38,9 @@ export function TopNavBarComponent(props: Props): JSX.Element {
                 ))}
               </div>
             </div>
+            <a className="navbar-item" href="#" onClick={props.onOptionsClick}>
+              Options
+            </a>
             <a className="navbar-item" href="#" onClick={props.onAboutClick}>
               About
             </a>

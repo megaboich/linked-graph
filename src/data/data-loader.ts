@@ -1,5 +1,10 @@
 import { getRandomNumber } from "src/helpers/random";
-import { GraphObject, GraphConnection, GraphModel } from "./graph-model";
+import {
+  GraphObject,
+  GraphConnection,
+  GraphModel,
+  defaultGraphOptions
+} from "./graph-model";
 import { getAmsterdamMetroGraphData } from "./sample-data-amsterdam-metro";
 import { getCircleGraphData } from "./sample-data-circle";
 import { getUrsaMajorGraphData } from "./sample-ursa-major";
@@ -21,7 +26,7 @@ function buildGraphFromData(
   points: string[],
   links: string[],
   relation: string
-) {
+): GraphModel {
   const objects = points.map(s => {
     const object: GraphObject = {
       id: s,
@@ -48,7 +53,7 @@ function buildGraphFromData(
     return connection;
   });
 
-  return { objects, connections };
+  return { objects, connections, options: defaultGraphOptions };
 }
 
 export function getSamples(): GraphSample[] {

@@ -1,5 +1,11 @@
 import { ensure } from "src/helpers/syntax";
-import { GraphObject, GraphModel, GraphConnection } from "./graph-model";
+import {
+  GraphObject,
+  GraphModel,
+  GraphConnection,
+  GraphOptions,
+  defaultGraphOptions
+} from "./graph-model";
 
 interface GraphLink {
   sourceId: string;
@@ -10,6 +16,7 @@ interface GraphLink {
 interface SerializedGraphData {
   objects: GraphObject[];
   links: GraphLink[];
+  options: GraphOptions;
 }
 
 export function serializeGraph(graph: GraphModel): string {
@@ -36,7 +43,8 @@ export function serializeGraph(graph: GraphModel): string {
 
   const data: SerializedGraphData = {
     objects: objectClones,
-    links
+    links,
+    options: graph.options
   };
 
   return JSON.stringify(data);
@@ -44,7 +52,7 @@ export function serializeGraph(graph: GraphModel): string {
 
 export function deserializeGraph(serializedGraph: string): GraphModel {
   try {
-    const { objects, links } = JSON.parse(
+    const { objects, links, options } = JSON.parse(
       serializedGraph
     ) as SerializedGraphData;
     ensure(objects);
@@ -63,7 +71,8 @@ export function deserializeGraph(serializedGraph: string): GraphModel {
 
     return {
       objects,
-      connections
+      connections,
+      options: options || defaultGraphOptions
     };
   } catch (ex) {
     console.error(ex);

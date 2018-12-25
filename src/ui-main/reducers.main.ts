@@ -1,13 +1,17 @@
-import { getRandomName, getRandomNumber } from "src/helpers/random";
+import { getRandomName } from "src/helpers/random";
 
-import { AppState, MainState } from "../store";
-import { GraphObject, GraphConnection } from "../data/graph-model";
+import { MainState } from "../store";
+import {
+  GraphObject,
+  GraphConnection,
+  GraphOptions,
+  GraphModel
+} from "../data/graph-model";
 import { saveGraphToLocalStorage } from "../data/graph-local-storage";
 
 import { ActionType, getType } from "typesafe-actions";
 
 import * as actionCreators from "./actions.main";
-import { object } from "prop-types";
 type Action = ActionType<typeof actionCreators>;
 
 export function reducers(
@@ -21,11 +25,7 @@ export function reducers(
     case getType(actionCreators.removeObject):
       return removeObject(state);
     case getType(actionCreators.loadGraph):
-      return loadGraph(
-        state,
-        action.payload.objects,
-        action.payload.connections
-      );
+      return loadGraph(state, action.payload);
     case getType(actionCreators.modifyObject):
       return editObject(
         state,
@@ -34,6 +34,8 @@ export function reducers(
       );
     case getType(actionCreators.selectObject):
       return selectObject(state, action.payload);
+    case getType(actionCreators.setOptions):
+      return setOptions(state, action.payload);
     default:
       return state;
   }
@@ -77,7 +79,7 @@ function editObject(
     x => x.source.id !== newObject.id && x.target.id !== newObject.id
   );
 
-  // Change the reference in connections to new object
+  // Update references in connections to actual objects
   for (const connection of newConnections) {
     if (connection.source.id === newObject.id) {
       connection.source = newObject;
@@ -121,17 +123,22 @@ function editObject(
   return newState;
 }
 
-function loadGraph(
-  state: MainState,
-  objects: GraphObject[],
-  connections: GraphConnection[]
-): MainState {
+function loadGraph(state: MainState, model: GraphModel): MainState {
   return {
     ...state,
-    objects: objects,
-    connections: connections,
+    ...model,
     selectedObject: undefined
   };
+}
+
+function setOptions(state: MainState, options: GraphOptions): MainState {
+  const newOptions = { ...options };
+  const newState = {
+    ...state,
+    options: newOptions
+  };
+  saveGraphToLocalStorage(newState);
+  return newState;
 }
 
 function generateUniqueObjectId(existingObjects: GraphObject[]): string {

@@ -1,5 +1,10 @@
 import { createAction } from "typesafe-actions";
-import { GraphObject, GraphConnection, GraphModel } from "src/data/graph-model";
+import {
+  GraphObject,
+  GraphConnection,
+  GraphModel,
+  GraphOptions
+} from "src/data/graph-model";
 
 /*
  * action creators
@@ -20,4 +25,9 @@ export const modifyObject = createAction(
 export const loadGraph = createAction(
   "LOAD_GRAPH",
   resolve => (graph: GraphModel) => resolve(graph)
+);
+
+export const setOptions = createAction(
+  "SET_OPTIONS",
+  resolve => (options: GraphOptions) => resolve(options)
 );

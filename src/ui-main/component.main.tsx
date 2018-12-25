@@ -1,7 +1,12 @@
 import * as React from "react";
 import { Component } from "react";
 
-import { GraphObject, GraphConnection, GraphModel } from "src/data/graph-model";
+import {
+  GraphObject,
+  GraphConnection,
+  GraphModel,
+  GraphOptions
+} from "src/data/graph-model";
 import { GraphNode } from "src/ui-components/graph/graph-objects";
 import { getSamples, GraphSample } from "src/data/data-loader";
 
@@ -9,22 +14,27 @@ import { IconPencil } from "src/ui-components/icons/icon-pencil";
 import { IconPlus } from "src/ui-components/icons/icon-plus";
 import { GraphComponent } from "src/ui-components/graph/graph.component";
 import { TopNavBarComponent } from "./component.top-navbar";
+import { ObjectEditorComponentContainer } from "./object-editor/container.object-editor";
+import { OptionsComponent } from "./component.options";
 
 import "./component.main.less";
-import { ObjectEditorComponentContainer } from "./object-editor/container.object-editor";
 
 export interface Props {
   selectedObject: GraphObject | undefined;
   objects: GraphObject[];
   connections: GraphConnection[];
+  options: GraphOptions;
 
   selectObject(object?: GraphObject): void;
   addObject(currentlySelected?: GraphObject): void;
   showObjectEditor(object: GraphObject, connections: GraphConnection[]): void;
   loadGraph(model: GraphModel): void;
+  setOptions(options: GraphOptions): void;
 }
 
-export interface State {}
+export interface State {
+  showOptions?: boolean;
+}
 
 export class MainComponent extends Component<Props, State> {
   readonly samples = getSamples();
@@ -36,6 +46,19 @@ export class MainComponent extends Component<Props, State> {
 
   handleAboutClick = () => {
     //TODO
+  };
+
+  handleShowOptionsClick = () => {
+    this.setState({ showOptions: true });
+  };
+
+  handleHideOptionsClick = () => {
+    this.setState({ showOptions: false });
+  };
+
+  handleApplyOptionsClick = (options: GraphOptions) => {
+    this.setState({ showOptions: false });
+    this.props.setOptions(options);
   };
 
   handleOnSelectNode = (node?: GraphNode) => {
@@ -66,13 +89,25 @@ export class MainComponent extends Component<Props, State> {
         <TopNavBarComponent
           samples={this.samples}
           onAboutClick={this.handleAboutClick}
+          onOptionsClick={this.handleShowOptionsClick}
           onLoadSampleClick={this.handleLoadSampleClick}
         />
 
         <ObjectEditorComponentContainer />
 
+        <OptionsComponent
+          visible={this.state.showOptions}
+          options={this.props.options}
+          onClose={this.handleHideOptionsClick}
+          onApply={this.handleApplyOptionsClick}
+        />
+
         <div className="graph-container">
           <GraphComponent
+            useForce={this.props.options.useForceLayout}
+            forceLinkLength={this.props.options.forceLayoutLinkLength}
+            drawLinkText={this.props.options.drawLinkText}
+            drawLinkArrows={this.props.options.drawLinkArrows}
             nodes={this.props.objects}
             links={this.props.connections}
             selectedNode={this.props.selectedObject}

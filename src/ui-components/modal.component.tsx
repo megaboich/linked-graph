@@ -7,7 +7,7 @@ interface IComponentState {}
 
 interface IComponentProps {
   title: string;
-  show: boolean;
+  show?: boolean;
   body: JSX.Element;
   footerButtons?: JSX.Element | false;
   headerButtons?: JSX.Element | false;
