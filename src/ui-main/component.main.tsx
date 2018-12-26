@@ -16,6 +16,7 @@ import { GraphComponent } from "src/ui-components/graph/graph.component";
 import { TopNavBarComponent } from "./component.top-navbar";
 import { ObjectEditorComponentContainer } from "./object-editor/container.object-editor";
 import { OptionsComponent } from "./component.options";
+import { AboutComponent } from "./component.about";
 
 import "./component.main.less";
 
@@ -34,6 +35,7 @@ export interface Props {
 
 export interface State {
   showOptions?: boolean;
+  showAbout?: boolean;
 }
 
 export class MainComponent extends Component<Props, State> {
@@ -44,8 +46,12 @@ export class MainComponent extends Component<Props, State> {
     this.state = {};
   }
 
-  handleAboutClick = () => {
-    //TODO
+  handleShowAboutClick = () => {
+    this.setState({ showAbout: true });
+  };
+
+  handleHideAboutClick = () => {
+    this.setState({ showAbout: false });
   };
 
   handleShowOptionsClick = () => {
@@ -88,7 +94,7 @@ export class MainComponent extends Component<Props, State> {
       <div className="main-component">
         <TopNavBarComponent
           samples={this.samples}
-          onAboutClick={this.handleAboutClick}
+          onAboutClick={this.handleShowAboutClick}
           onOptionsClick={this.handleShowOptionsClick}
           onLoadSampleClick={this.handleLoadSampleClick}
         />
@@ -100,6 +106,11 @@ export class MainComponent extends Component<Props, State> {
           options={this.props.options}
           onClose={this.handleHideOptionsClick}
           onApply={this.handleApplyOptionsClick}
+        />
+
+        <AboutComponent
+          visible={this.state.showAbout}
+          onClose={this.handleHideAboutClick}
         />
 
         <div className="graph-container">
