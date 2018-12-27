@@ -38,8 +38,9 @@ export class AboutComponent extends Component<Props, State> {
               </p>
               <p>Features:</p>
               <ul>
-                <li>Drag and drop.</li>
-                <li>Add, remove and edit of objects and links.</li>
+                <li>Adding new objects and connections.</li>
+                <li>Move object with drag and drop.</li>
+                <li>Editing of objects and managing connections.</li>
                 <li>Automatic live graph force layout.</li>
                 <li>Displaying link directions and text.</li>
                 <li>Zooming and panning.</li>

@@ -123,7 +123,7 @@ export class MainComponent extends Component<Props, State> {
             links={this.props.connections}
             selectedNode={this.props.selectedObject}
             onSelectNode={this.handleOnSelectNode}
-            onDoubleClickNode={this.handleShowEditorButtonClick}
+            onNodeDoubleTap={this.handleShowEditorButtonClick}
           />
 
           <div className="control-block">

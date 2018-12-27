@@ -1,15 +1,17 @@
 import * as React from "react";
-import { Component, MouseEvent } from "react";
+import { Component, MouseEvent, TouchEvent } from "react";
 import * as cn from "classnames";
 import { GraphNode } from "./graph-objects";
+
+let lastTapTime = new Date().getTime();
 
 export interface State {}
 
 export interface Props {
   node: GraphNode;
   isSelected?: boolean;
-  onNodeMouseDown(node: GraphNode, e: MouseEvent): void;
-  onNodeDoubleClick?(node: GraphNode, e: MouseEvent): void;
+  onNodeTouchStart(node: GraphNode, clientX: number, clientY: number): void;
+  onNodeDoubleTap?(node: GraphNode): void;
 }
 
 export class NodeComponent extends Component<Props, State> {
@@ -21,12 +23,38 @@ export class NodeComponent extends Component<Props, State> {
   handleMouseDown = (e: MouseEvent<SVGGElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    this.props.onNodeMouseDown(this.props.node, e);
+    this.props.onNodeTouchStart(this.props.node, e.clientX, e.clientY);
+  };
+
+  handleTouchStart = (e: TouchEvent<SVGGElement>) => {
+    if (e.changedTouches.length > 0) {
+      e.stopPropagation();
+      const now = new Date().getTime();
+      if (now - lastTapTime < 500) {
+        // We have double tap here
+        setTimeout(() => {
+          /**
+           * Timeout is needed to allow browser finish all events like TouchUp, etc
+           * preventDefault is not working here
+           */
+          if (this.props.onNodeDoubleTap) {
+            this.props.onNodeDoubleTap(this.props.node);
+          }
+        }, 100);
+      } else {
+        this.props.onNodeTouchStart(
+          this.props.node,
+          e.changedTouches[0].clientX,
+          e.changedTouches[0].clientY
+        );
+      }
+      lastTapTime = now;
+    }
   };
 
   handleDoubleClick = (e: MouseEvent<SVGGElement>) => {
-    if (this.props.onNodeDoubleClick) {
-      this.props.onNodeDoubleClick(this.props.node, e);
+    if (this.props.onNodeDoubleTap) {
+      this.props.onNodeDoubleTap(this.props.node);
     }
   };
 
@@ -41,6 +69,7 @@ export class NodeComponent extends Component<Props, State> {
           "is-selected": this.props.isSelected
         })}
         transform={`translate(${nodeX}, ${nodeY})`}
+        onTouchStart={this.handleTouchStart}
         onMouseDown={this.handleMouseDown}
         onDoubleClick={this.handleDoubleClick}
       >

@@ -1,34 +1,22 @@
 import * as React from "react";
-import { Component, MouseEvent, WheelEvent } from "react";
+import { Component, MouseEvent, WheelEvent, TouchEvent } from "react";
 import * as cn from "classnames";
 import { ensure } from "src/helpers/syntax";
 import { getRandomWord } from "src/helpers/random";
 
 import { GraphNode, GraphLink } from "./graph-objects";
+import { GridComponent } from "./grid.component";
 import { NodeComponent } from "./node.component";
 import { LinkComponent } from "./link.component";
 import { LinkTextComponent } from "./link-text.component";
 import { GraphColaLayout } from "./graph-cola-layout";
+import { GraphDndHelper } from "./graph-dnd-helper";
 
 import "./graph.component.less";
 
 export interface State {
   width: number;
   height: number;
-  cameraX: number;
-  cameraY: number;
-  cameraZoom: number;
-  dragStartCameraX?: number;
-  dragStartCameraY?: number;
-  dragStartCameraMouseX?: number;
-  dragStartCameraMouseY?: number;
-  mouseDown?: boolean;
-
-  dragNode?: GraphNode;
-  dragStartNodeX?: number;
-  dragStartNodeY?: number;
-  dragStartNodeMouseX?: number;
-  dragStartNodeMouseY?: number;
 }
 
 export interface Props {
@@ -36,7 +24,7 @@ export interface Props {
   links: GraphLink[];
   selectedNode?: GraphNode;
   onSelectNode(node?: GraphNode): void;
-  onDoubleClickNode?(node: GraphNode): void;
+  onNodeDoubleTap?(node: GraphNode): void;
   drawLinkText: boolean;
   drawLinkArrows: boolean;
   useForce: boolean;
@@ -44,30 +32,19 @@ export interface Props {
 }
 
 export class GraphComponent extends Component<Props, State> {
-  private layout = new GraphColaLayout(() => this.forceUpdate());
+  private readonly layout = new GraphColaLayout(() => this.forceUpdate());
   private readonly componentId = "graph-component-" + getRandomWord(16);
+  private readonly cameraDndHelper = new GraphDndHelper();
 
   constructor(props: Props) {
     super(props);
-    this.state = {
-      width: 0,
-      height: 0,
-      cameraX: 0,
-      cameraY: 0,
-      cameraZoom: 1
-    };
+    this.state = { width: 0, height: 0 };
   }
 
   componentDidMount() {
     const { width, height } = this.getParentContainerDimensions();
-
-    this.setState({
-      width,
-      height,
-      cameraX: width / 2,
-      cameraY: height / 2
-    });
-
+    this.setState({ width, height });
+    this.cameraDndHelper.initViewSize(width, height);
     this.layout.init({
       width,
       height,
@@ -76,7 +53,6 @@ export class GraphComponent extends Component<Props, State> {
       enable: this.props.useForce,
       forceLinkLength: this.props.forceLinkLength
     });
-
     window.addEventListener("resize", this.handleWindowResize);
   }
 
@@ -106,14 +82,8 @@ export class GraphComponent extends Component<Props, State> {
 
   handleWindowResize = () => {
     const { width, height } = this.getParentContainerDimensions();
-    const dx = (this.state.width - width) * this.state.cameraZoom;
-    const dy = (this.state.height - height) * this.state.cameraZoom;
-    this.setState({
-      width,
-      height,
-      cameraX: this.state.cameraX - dx,
-      cameraY: this.state.cameraY - dy
-    });
+    this.cameraDndHelper.handleViewResize(width, height);
+    this.setState({ width, height });
     this.layout.size([width, height]).triggerLayout();
   };
 
@@ -127,64 +97,52 @@ export class GraphComponent extends Component<Props, State> {
     return { width: rect.width, height: rect.height };
   }
 
-  handleNodeMouseDown = (node: GraphNode, e: MouseEvent<SVGGElement>) => {
+  handleNodeTouchStart = (
+    node: GraphNode,
+    clientX: number,
+    clientY: number
+  ) => {
     this.props.onSelectNode(node);
-
-    this.setState({
-      dragNode: node,
-      dragStartNodeX: node.x,
-      dragStartNodeY: node.y,
-      dragStartNodeMouseX: e.clientX,
-      dragStartNodeMouseY: e.clientY
-    });
+    this.cameraDndHelper.startNodeDrag(node, clientX, clientY);
   };
 
   handleGraphMouseDown = (e: MouseEvent<SVGGElement>) => {
     this.props.onSelectNode(undefined);
-
-    this.setState({
-      mouseDown: true,
-      dragNode: undefined,
-      dragStartCameraX: this.state.cameraX,
-      dragStartCameraY: this.state.cameraY,
-      dragStartCameraMouseX: e.clientX,
-      dragStartCameraMouseY: e.clientY
-    });
+    this.cameraDndHelper.startCameraDrag(e.clientX, e.clientY);
   };
 
-  handleGraphMouseUp = () => {
-    const dragNode = this.state.dragNode;
-    if (dragNode) {
-      dragNode.fixed = 0;
-      this.layout.triggerLayout();
+  handleGraphTouchStart = (e: TouchEvent<SVGGElement>) => {
+    if (e.changedTouches.length > 0) {
+      this.props.onSelectNode(undefined);
+      this.cameraDndHelper.startCameraDrag(
+        e.changedTouches[0].clientX,
+        e.changedTouches[0].clientY
+      );
     }
-    this.setState({
-      mouseDown: false,
-      dragNode: undefined
-    });
+  };
+
+  handleGraphMouseUpOrTouchEnd = () => {
+    this.cameraDndHelper.stopDrag();
+    this.layout.triggerLayout();
   };
 
   handleGraphMouseMove = (e: MouseEvent<SVGGElement>) => {
-    const dragNode = this.state.dragNode;
-    if (dragNode) {
-      const dx = (this.state.dragStartNodeMouseX || 0) - e.clientX;
-      const dy = (this.state.dragStartNodeMouseY || 0) - e.clientY;
-      dragNode.x =
-        (this.state.dragStartNodeX || 0) - dx / this.state.cameraZoom;
-      dragNode.y =
-        (this.state.dragStartNodeY || 0) - dy / this.state.cameraZoom;
-      dragNode.px = dragNode.x;
-      dragNode.py = dragNode.y;
-      dragNode.fixed = 1;
-      this.forceUpdate();
+    if (this.cameraDndHelper.doDrag(e.clientX, e.clientY)) {
       this.layout.triggerLayout();
-    } else if (this.state.mouseDown) {
-      const dx = (this.state.dragStartCameraMouseX || 0) - e.clientX;
-      const dy = (this.state.dragStartCameraMouseY || 0) - e.clientY;
-      this.setState({
-        cameraX: (this.state.dragStartCameraX || 0) - dx,
-        cameraY: (this.state.dragStartCameraY || 0) - dy
-      });
+    }
+    this.forceUpdate();
+  };
+
+  handleGraphTouchMove = (e: TouchEvent<SVGGElement>) => {
+    if (e.changedTouches.length > 0) {
+      if (
+        this.cameraDndHelper.doDrag(
+          e.changedTouches[0].clientX,
+          e.changedTouches[0].clientY
+        )
+      ) {
+        this.forceUpdate();
+      }
     }
   };
 
@@ -192,18 +150,13 @@ export class GraphComponent extends Component<Props, State> {
     let zoomFactor = (e.deltaZ || e.deltaY) / 200;
     zoomFactor = Math.max(-1, zoomFactor);
     zoomFactor = Math.min(1, zoomFactor);
-    let newScale =
-      Math.round(this.state.cameraZoom * (1 - zoomFactor) * 1000) / 1000;
-    newScale = Math.max(0.1, newScale);
-    newScale = Math.min(10, newScale);
-    this.setState({
-      cameraZoom: newScale
-    });
+    this.cameraDndHelper.zoom(zoomFactor);
+    this.forceUpdate();
   };
 
-  handleNodeDoubleClick = (node: GraphNode) => {
-    if (this.props.onDoubleClickNode) {
-      this.props.onDoubleClickNode(node);
+  handleNodeDoubleTap = (node: GraphNode) => {
+    if (this.props.onNodeDoubleTap) {
+      this.props.onNodeDoubleTap(node);
     }
   };
 
@@ -213,7 +166,7 @@ export class GraphComponent extends Component<Props, State> {
 
   render() {
     const { width, height } = this.state;
-    const { cameraZoom, cameraX, cameraY } = this.state;
+    const { cameraZoom, cameraX, cameraY } = this.cameraDndHelper;
     const translateX = Math.round(cameraX / cameraZoom - width);
     const translateY = Math.round(cameraY / cameraZoom - height);
 
@@ -221,7 +174,7 @@ export class GraphComponent extends Component<Props, State> {
       <div
         id={this.componentId}
         className={cn("graph-component", {
-          "is-mouse-down": this.state.mouseDown
+          "is-mouse-down": this.cameraDndHelper.mouseDown
         })}
       >
         {this.layout.isLayoutCalculated && (
@@ -229,9 +182,13 @@ export class GraphComponent extends Component<Props, State> {
             style={{ width, height }}
             onMouseDown={this.handleGraphMouseDown}
             onMouseMove={this.handleGraphMouseMove}
-            onMouseUp={this.handleGraphMouseUp}
-            onMouseLeave={this.handleGraphMouseUp}
+            onMouseUp={this.handleGraphMouseUpOrTouchEnd}
+            onMouseLeave={this.handleGraphMouseUpOrTouchEnd}
             onWheel={this.handleGraphWheel}
+            onTouchStart={this.handleGraphTouchStart}
+            onTouchMove={this.handleGraphTouchMove}
+            onTouchEnd={this.handleGraphMouseUpOrTouchEnd}
+            onTouchCancel={this.handleGraphMouseUpOrTouchEnd}
           >
             <defs>
               <marker
@@ -250,6 +207,12 @@ export class GraphComponent extends Component<Props, State> {
               transform={`scale(${cameraZoom}) translate(${translateX}, ${translateY})`}
             >
               <g transform={`translate(${width / 2}, ${height / 2})`}>
+                <GridComponent
+                  centerX={width / 2}
+                  centerY={height / 2}
+                  step={100}
+                  count={4}
+                />
                 {this.props.drawLinkText
                   ? this.props.links.map(link => (
                       <LinkTextComponent
@@ -270,8 +233,8 @@ export class GraphComponent extends Component<Props, State> {
                   <NodeComponent
                     key={node.id}
                     node={node}
-                    onNodeMouseDown={this.handleNodeMouseDown}
-                    onNodeDoubleClick={this.handleNodeDoubleClick}
+                    onNodeTouchStart={this.handleNodeTouchStart}
+                    onNodeDoubleTap={this.handleNodeDoubleTap}
                     isSelected={this.props.selectedNode === node}
                   />
                 ))}
