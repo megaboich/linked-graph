@@ -141,12 +141,14 @@ export class GraphComponent extends Component<Props, State> {
           e.changedTouches[0].clientY
         )
       ) {
-        this.forceUpdate();
+        this.layout.triggerLayout();
       }
+      this.forceUpdate();
     }
   };
 
   handleGraphWheel = (e: WheelEvent<SVGGElement>) => {
+    // console.log("wheel!", e.clientX, e.clientY);
     let zoomFactor = (e.deltaZ || e.deltaY) / 200;
     zoomFactor = Math.max(-1, zoomFactor);
     zoomFactor = Math.min(1, zoomFactor);
