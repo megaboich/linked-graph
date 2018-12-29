@@ -12,24 +12,19 @@ export interface Props {
   onApply(changedOptions: GraphOptions): void;
 }
 
-export interface State {
-  changedOptions: GraphOptions;
-}
+export interface State extends GraphOptions {}
 
 export class OptionsComponent extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      changedOptions: { ...props.options }
+      ...props.options
     };
   }
 
   componentWillReceiveProps(newProps: Props) {
-    if (
-      JSON.stringify(this.state.changedOptions) !=
-      JSON.stringify(newProps.options)
-    ) {
-      this.setState({ changedOptions: { ...newProps.options } });
+    if (JSON.stringify(this.state) != JSON.stringify(newProps.options)) {
+      this.setState({ ...newProps.options });
     }
   }
 
@@ -38,7 +33,7 @@ export class OptionsComponent extends Component<Props, State> {
   };
 
   handleApplyClick = () => {
-    this.props.onApply({ ...this.state.changedOptions });
+    this.props.onApply({ ...this.state });
   };
 
   render() {
@@ -54,12 +49,10 @@ export class OptionsComponent extends Component<Props, State> {
                 <label className="checkbox">
                   <input
                     type="checkbox"
-                    checked={this.state.changedOptions.drawLinkArrows}
-                    onChange={e => {
-                      this.state.changedOptions.drawLinkArrows =
-                        e.target.checked;
-                      this.forceUpdate();
-                    }}
+                    checked={this.state.drawLinkArrows}
+                    onChange={e =>
+                      this.setState({ drawLinkArrows: e.target.checked })
+                    }
                   />{" "}
                   Draw link arrows
                 </label>
@@ -70,11 +63,10 @@ export class OptionsComponent extends Component<Props, State> {
                 <label className="checkbox">
                   <input
                     type="checkbox"
-                    checked={this.state.changedOptions.drawLinkText}
-                    onChange={e => {
-                      this.state.changedOptions.drawLinkText = e.target.checked;
-                      this.forceUpdate();
-                    }}
+                    checked={this.state.drawLinkText}
+                    onChange={e =>
+                      this.setState({ drawLinkText: e.target.checked })
+                    }
                   />{" "}
                   Draw link text
                 </label>
@@ -85,12 +77,10 @@ export class OptionsComponent extends Component<Props, State> {
                 <label className="checkbox">
                   <input
                     type="checkbox"
-                    checked={this.state.changedOptions.useForceLayout}
-                    onChange={e => {
-                      this.state.changedOptions.useForceLayout =
-                        e.target.checked;
-                      this.forceUpdate();
-                    }}
+                    checked={this.state.useForceLayout}
+                    onChange={e =>
+                      this.setState({ useForceLayout: e.target.checked })
+                    }
                   />{" "}
                   Enable force layout
                 </label>
@@ -99,18 +89,33 @@ export class OptionsComponent extends Component<Props, State> {
             <div className="field-link-length">
               <label>Link length:</label>
               <input
-                disabled={!this.state.changedOptions.useForceLayout}
+                disabled={!this.state.useForceLayout}
                 className="input"
                 type="number"
-                value={this.state.changedOptions.forceLayoutLinkLength}
+                value={this.state.forceLayoutLinkLength}
                 onChange={e => {
-                  this.state.changedOptions.forceLayoutLinkLength = parseInt(
-                    e.target.value,
-                    10
-                  );
-                  this.forceUpdate();
+                  const v = parseInt(e.target.value);
+                  if (!isNaN(v)) {
+                    this.setState({
+                      forceLayoutLinkLength: v
+                    });
+                  }
                 }}
               />
+            </div>
+            <div className="field">
+              <div className="control">
+                <label className="checkbox">
+                  <input
+                    type="checkbox"
+                    checked={this.state.drawRulerGrid}
+                    onChange={e =>
+                      this.setState({ drawRulerGrid: e.target.checked })
+                    }
+                  />{" "}
+                  Draw ruler grid
+                </label>
+              </div>
             </div>
           </div>
         }

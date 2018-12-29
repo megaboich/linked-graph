@@ -24,11 +24,13 @@ export interface GraphOptions {
   drawLinkText: boolean;
   useForceLayout: boolean;
   forceLayoutLinkLength: number;
+  drawRulerGrid: boolean;
 }
 
 export const defaultGraphOptions: GraphOptions = {
   drawLinkArrows: true,
   drawLinkText: true,
   forceLayoutLinkLength: 70,
-  useForceLayout: true
+  useForceLayout: true,
+  drawRulerGrid: true
 };

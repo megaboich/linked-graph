@@ -119,6 +119,7 @@ export class MainComponent extends Component<Props, State> {
             forceLinkLength={this.props.options.forceLayoutLinkLength}
             drawLinkText={this.props.options.drawLinkText}
             drawLinkArrows={this.props.options.drawLinkArrows}
+            drawRulerGrid={this.props.options.drawRulerGrid}
             nodes={this.props.objects}
             links={this.props.connections}
             selectedNode={this.props.selectedObject}

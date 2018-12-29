@@ -86,10 +86,24 @@ export class GraphDndHelper {
     this.dragNode = undefined;
   }
 
-  zoom(zoomFactor: number) {
+  zoom(zoomFactor: number, x: number, y: number) {
     let newScale = Math.round(this.cameraZoom * (1 - zoomFactor) * 1000) / 1000;
     newScale = Math.max(0.1, newScale);
     newScale = Math.min(10, newScale);
+
+    const m1 = {
+      x: (x - this.cameraX) / this.cameraZoom + this.width / 2,
+      y: (y - this.cameraY) / this.cameraZoom + this.height / 2
+    };
+
     this.cameraZoom = newScale;
+
+    const m2 = {
+      x: (x - this.cameraX) / this.cameraZoom + this.width / 2,
+      y: (y - this.cameraY) / this.cameraZoom + this.height / 2
+    };
+
+    this.cameraX -= (m1.x - m2.x) * this.cameraZoom;
+    this.cameraY -= (m1.y - m2.y) * this.cameraZoom;
   }
 }

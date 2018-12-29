@@ -27,6 +27,7 @@ export interface Props {
   onNodeDoubleTap?(node: GraphNode): void;
   drawLinkText: boolean;
   drawLinkArrows: boolean;
+  drawRulerGrid: boolean;
   useForce: boolean;
   forceLinkLength: number;
 }
@@ -35,6 +36,7 @@ export class GraphComponent extends Component<Props, State> {
   private readonly layout = new GraphColaLayout(() => this.forceUpdate());
   private readonly componentId = "graph-component-" + getRandomWord(16);
   private readonly cameraDndHelper = new GraphDndHelper();
+  private svgRootElement?: SVGElement;
 
   constructor(props: Props) {
     super(props);
@@ -148,11 +150,21 @@ export class GraphComponent extends Component<Props, State> {
   };
 
   handleGraphWheel = (e: WheelEvent<SVGGElement>) => {
+    if (!this.svgRootElement) {
+      return;
+    }
+    const rootRect = this.svgRootElement.getBoundingClientRect();
+
     // console.log("wheel!", e.clientX, e.clientY);
+
     let zoomFactor = (e.deltaZ || e.deltaY) / 200;
     zoomFactor = Math.max(-1, zoomFactor);
     zoomFactor = Math.min(1, zoomFactor);
-    this.cameraDndHelper.zoom(zoomFactor);
+    this.cameraDndHelper.zoom(
+      zoomFactor,
+      e.clientX - rootRect.left,
+      e.clientY - rootRect.top
+    );
     this.forceUpdate();
   };
 
@@ -169,8 +181,8 @@ export class GraphComponent extends Component<Props, State> {
   render() {
     const { width, height } = this.state;
     const { cameraZoom, cameraX, cameraY } = this.cameraDndHelper;
-    const translateX = Math.round(cameraX / cameraZoom - width);
-    const translateY = Math.round(cameraY / cameraZoom - height);
+    const translateX = cameraX / cameraZoom - width;
+    const translateY = cameraY / cameraZoom - height;
 
     return (
       <div
@@ -181,6 +193,7 @@ export class GraphComponent extends Component<Props, State> {
       >
         {this.layout.isLayoutCalculated && (
           <svg
+            ref={el => (this.svgRootElement = el as any)}
             style={{ width, height }}
             onMouseDown={this.handleGraphMouseDown}
             onMouseMove={this.handleGraphMouseMove}
@@ -196,7 +209,7 @@ export class GraphComponent extends Component<Props, State> {
               <marker
                 id="marker-arrowend"
                 viewBox="0 -5 10 10"
-                refX="21"
+                refX="19"
                 refY="0"
                 markerWidth="6"
                 markerHeight="6"
@@ -209,12 +222,14 @@ export class GraphComponent extends Component<Props, State> {
               transform={`scale(${cameraZoom}) translate(${translateX}, ${translateY})`}
             >
               <g transform={`translate(${width / 2}, ${height / 2})`}>
-                <GridComponent
-                  centerX={width / 2}
-                  centerY={height / 2}
-                  step={100}
-                  count={4}
-                />
+                {this.props.drawRulerGrid && (
+                  <GridComponent
+                    centerX={width / 2}
+                    centerY={height / 2}
+                    step={100}
+                    count={20}
+                  />
+                )}
                 {this.props.drawLinkText
                   ? this.props.links.map(link => (
                       <LinkTextComponent
