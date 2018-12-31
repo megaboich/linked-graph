@@ -19,6 +19,7 @@ export class GraphDndHelper {
   dragStartNodeMouseY?: number;
   width: number = 0;
   height: number = 0;
+  zoomStartDistance?: number;
 
   initViewSize(width: number, height: number) {
     this.width = width;
@@ -77,13 +78,14 @@ export class GraphDndHelper {
     return false;
   }
 
-  stopDrag() {
+  stopInteractions() {
     const dragNode = this.dragNode;
     if (dragNode) {
       dragNode.fixed = 0;
     }
     this.mouseDown = false;
     this.dragNode = undefined;
+    this.zoomStartDistance = undefined;
   }
 
   zoom(zoomFactor: number, x: number, y: number) {
@@ -105,5 +107,27 @@ export class GraphDndHelper {
 
     this.cameraX -= (m1.x - m2.x) * this.cameraZoom;
     this.cameraY -= (m1.y - m2.y) * this.cameraZoom;
+  }
+
+  startZoomingWith2Points(
+    p1: { x: number; y: number },
+    p2: { x: number; y: number }
+  ) {
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    this.zoomStartDistance = Math.sqrt(dx * dx + dy * dy);
+  }
+
+  zoomWith2Points(p1: { x: number; y: number }, p2: { x: number; y: number }) {
+    if (this.zoomStartDistance === undefined) {
+      return;
+    }
+    const dx = p1.x - p2.x;
+    const dy = p1.y - p2.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const zoomFactor = (distance - this.zoomStartDistance) / 10;
+    const cx = (p1.x + p2.x) / 2;
+    const cy = (p1.y + p2.y) / 2;
+    this.zoom(zoomFactor, cx, cy);
   }
 }
