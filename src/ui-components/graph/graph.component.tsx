@@ -10,16 +10,15 @@ import { NodeComponent } from "./node.component";
 import { LinkComponent } from "./link.component";
 import { LinkTextComponent } from "./link-text.component";
 import { GraphColaLayout } from "./graph-cola-layout";
-import { GraphDndHelper } from "./graph-dnd-helper";
+import {
+  GraphDndHelper,
+  buildTouchInfoFromMouseEvent,
+  buildTouchInfo
+} from "./graph-dnd-helper";
 
 import "./graph.component.less";
 
-export interface State {
-  width: number;
-  height: number;
-  offsetX: number;
-  offsetY: number;
-}
+export interface State {}
 
 export interface Props {
   nodes: GraphNode[];
@@ -37,7 +36,7 @@ export interface Props {
 export class GraphComponent extends Component<Props, State> {
   private readonly layout = new GraphColaLayout(() => this.forceUpdate());
   private readonly componentId = "graph-component-" + getRandomWord(16);
-  private readonly cameraDndHelper = new GraphDndHelper();
+  private readonly dndHelper = new GraphDndHelper();
 
   constructor(props: Props) {
     super(props);
@@ -47,10 +46,10 @@ export class GraphComponent extends Component<Props, State> {
   componentDidMount() {
     const dimensions = this.getParentContainerDimensions();
     this.setState(dimensions);
-    this.cameraDndHelper.initViewSize(dimensions.width, dimensions.height);
+    this.dndHelper.initView(dimensions);
     this.layout.init({
-      width: dimensions.width,
-      height: dimensions.height,
+      width: this.dndHelper.width,
+      height: this.dndHelper.height,
       nodes: this.props.nodes,
       links: this.props.links,
       enable: this.props.useForce,
@@ -67,8 +66,8 @@ export class GraphComponent extends Component<Props, State> {
       newProps.forceLinkLength !== this.props.forceLinkLength
     ) {
       this.layout.init({
-        width: this.state.width,
-        height: this.state.height,
+        width: this.dndHelper.width,
+        height: this.dndHelper.height,
         nodes: newProps.nodes,
         links: newProps.links,
         enable: newProps.useForce,
@@ -85,10 +84,77 @@ export class GraphComponent extends Component<Props, State> {
 
   handleWindowResize = () => {
     const dimensions = this.getParentContainerDimensions();
-    this.cameraDndHelper.handleViewResize(dimensions.width, dimensions.height);
+    this.dndHelper.changeView(dimensions);
     this.setState(dimensions);
     this.layout.size([dimensions.width, dimensions.height]).triggerLayout();
   };
+
+  handleNodeTouchStart = (
+    node: GraphNode,
+    clientX: number,
+    clientY: number
+  ) => {
+    this.props.onSelectNode(node);
+    this.dndHelper.addNodeTouch(node, { clientX, clientY });
+  };
+
+  handleGraphMouseDown = (e: MouseEvent) => {
+    this.dndHelper.addTouch(buildTouchInfoFromMouseEvent(e));
+    this.props.onSelectNode(undefined);
+  };
+
+  handleGraphTouchStart = (e: TouchEvent) => {
+    this.dndHelper.addTouch(buildTouchInfo(e.changedTouches));
+    this.props.onSelectNode(undefined);
+  };
+
+  handleGraphTouchEnd = (e: TouchEvent) => {
+    this.dndHelper.endTouch(buildTouchInfo(e.changedTouches));
+    this.layout.triggerLayout();
+  };
+
+  handleGraphMouseUp = () => {
+    this.dndHelper.endTouchById([0]);
+    this.layout.triggerLayout();
+  };
+
+  handleGraphMouseMove = (e: MouseEvent) => {
+    const needToUpdateLayout = this.dndHelper.moveTouch(
+      buildTouchInfoFromMouseEvent(e)
+    );
+    if (needToUpdateLayout) {
+      this.layout.triggerLayout();
+    }
+    this.forceUpdate();
+  };
+
+  handleGraphTouchMove = (e: TouchEvent) => {
+    const needToUpdateLayout = this.dndHelper.moveTouch(
+      buildTouchInfo(e.changedTouches)
+    );
+    if (needToUpdateLayout) {
+      this.layout.triggerLayout();
+    }
+    this.forceUpdate();
+  };
+
+  handleGraphWheel = (e: WheelEvent) => {
+    let zoomFactor = (e.deltaZ || e.deltaY) / 200;
+    zoomFactor = Math.max(-1, zoomFactor);
+    zoomFactor = Math.min(1, zoomFactor);
+    this.dndHelper.zoom(zoomFactor, e.clientX, e.clientY);
+    this.forceUpdate();
+  };
+
+  handleNodeDoubleTap = (node: GraphNode) => {
+    if (this.props.onNodeDoubleTap) {
+      this.props.onNodeDoubleTap(node);
+    }
+  };
+
+  shouldComponentUpdate(nextProps: Props, nextState: State) {
+    return this.layout.isLayoutCalculated ? true : false;
+  }
 
   getParentContainerDimensions() {
     const componentDomElement = document.getElementById(this.componentId);
@@ -105,110 +171,8 @@ export class GraphComponent extends Component<Props, State> {
     };
   }
 
-  handleNodeTouchStart = (
-    node: GraphNode,
-    clientX: number,
-    clientY: number
-  ) => {
-    this.props.onSelectNode(node);
-    this.cameraDndHelper.startNodeDrag(node, clientX, clientY);
-  };
-
-  handleGraphMouseDown = (e: MouseEvent<SVGGElement>) => {
-    this.props.onSelectNode(undefined);
-    this.cameraDndHelper.startCameraDrag(e.clientX, e.clientY);
-  };
-
-  handleGraphTouchStart = (e: TouchEvent<SVGGElement>) => {
-    if (e.changedTouches.length == 1) {
-      this.props.onSelectNode(undefined);
-      this.cameraDndHelper.startCameraDrag(
-        e.changedTouches[0].clientX,
-        e.changedTouches[0].clientY
-      );
-    }
-
-    if (e.changedTouches.length == 2) {
-      // Looks like this is start of zooming
-      this.cameraDndHelper.startZoomingWith2Points(
-        {
-          x: e.changedTouches[0].clientX - this.state.offsetX,
-          y: e.changedTouches[0].clientY - this.state.offsetY
-        },
-        {
-          x: e.changedTouches[1].clientX - this.state.offsetX,
-          y: e.changedTouches[1].clientY - this.state.offsetY
-        }
-      );
-    }
-  };
-
-  handleGraphMouseUpOrTouchEnd = () => {
-    this.cameraDndHelper.stopInteractions();
-    this.layout.triggerLayout();
-  };
-
-  handleGraphMouseMove = (e: MouseEvent<SVGGElement>) => {
-    if (this.cameraDndHelper.doDrag(e.clientX, e.clientY)) {
-      this.layout.triggerLayout();
-    }
-    this.forceUpdate();
-  };
-
-  handleGraphTouchMove = (e: TouchEvent<SVGGElement>) => {
-    if (e.changedTouches.length == 1) {
-      if (
-        this.cameraDndHelper.doDrag(
-          e.changedTouches[0].clientX,
-          e.changedTouches[0].clientY
-        )
-      ) {
-        this.layout.triggerLayout();
-      }
-      this.forceUpdate();
-    }
-
-    if (e.changedTouches.length == 2) {
-      this.cameraDndHelper.zoomWith2Points(
-        {
-          x: e.changedTouches[0].clientX - this.state.offsetX,
-          y: e.changedTouches[0].clientY - this.state.offsetY
-        },
-        {
-          x: e.changedTouches[1].clientX - this.state.offsetX,
-          y: e.changedTouches[1].clientY - this.state.offsetY
-        }
-      );
-    }
-  };
-
-  handleGraphWheel = (e: WheelEvent<SVGGElement>) => {
-    // console.log("wheel!", e.clientX, e.clientY);
-
-    let zoomFactor = (e.deltaZ || e.deltaY) / 200;
-    zoomFactor = Math.max(-1, zoomFactor);
-    zoomFactor = Math.min(1, zoomFactor);
-    this.cameraDndHelper.zoom(
-      zoomFactor,
-      e.clientX - this.state.offsetX,
-      e.clientY - this.state.offsetY
-    );
-    this.forceUpdate();
-  };
-
-  handleNodeDoubleTap = (node: GraphNode) => {
-    if (this.props.onNodeDoubleTap) {
-      this.props.onNodeDoubleTap(node);
-    }
-  };
-
-  shouldComponentUpdate(nextProps: Props, nextState: State) {
-    return this.layout.isLayoutCalculated ? true : false;
-  }
-
   render() {
-    const { width, height } = this.state;
-    const { cameraZoom, cameraX, cameraY } = this.cameraDndHelper;
+    const { cameraZoom, cameraX, cameraY, width, height } = this.dndHelper;
     const translateX = cameraX / cameraZoom - width;
     const translateY = cameraY / cameraZoom - height;
 
@@ -216,7 +180,7 @@ export class GraphComponent extends Component<Props, State> {
       <div
         id={this.componentId}
         className={cn("graph-component", {
-          "is-mouse-down": this.cameraDndHelper.mouseDown
+          "is-mouse-down": this.dndHelper.dragCameraActive
         })}
       >
         {this.layout.isLayoutCalculated && (
@@ -224,13 +188,13 @@ export class GraphComponent extends Component<Props, State> {
             style={{ width, height }}
             onMouseDown={this.handleGraphMouseDown}
             onMouseMove={this.handleGraphMouseMove}
-            onMouseUp={this.handleGraphMouseUpOrTouchEnd}
-            onMouseLeave={this.handleGraphMouseUpOrTouchEnd}
+            onMouseUp={this.handleGraphMouseUp}
+            onMouseLeave={this.handleGraphMouseUp}
             onWheel={this.handleGraphWheel}
             onTouchStart={this.handleGraphTouchStart}
             onTouchMove={this.handleGraphTouchMove}
-            onTouchEnd={this.handleGraphMouseUpOrTouchEnd}
-            onTouchCancel={this.handleGraphMouseUpOrTouchEnd}
+            onTouchEnd={this.handleGraphTouchEnd}
+            onTouchCancel={this.handleGraphTouchEnd}
           >
             <defs>
               <marker

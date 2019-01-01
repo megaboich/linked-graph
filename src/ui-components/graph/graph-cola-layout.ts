@@ -57,7 +57,7 @@ export class GraphColaLayout extends cola.Layout {
       .avoidOverlaps(true)
       //.flowLayout("x", 50)
       .on(cola.EventType.start, e => {
-        console.log("Cola layout start event", e);
+        //console.log("Cola layout start event", e);
       })
       .on(cola.EventType.tick, e => {
         this._isLayoutCalculated = true;
@@ -75,7 +75,7 @@ export class GraphColaLayout extends cola.Layout {
         }
       })
       .on(cola.EventType.end, e => {
-        console.log("Cola layout end event", e);
+        //console.log("Cola layout end event", e);
         this.clearTimer();
         this.render();
       })

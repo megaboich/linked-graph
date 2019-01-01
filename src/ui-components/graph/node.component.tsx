@@ -34,7 +34,7 @@ export class NodeComponent extends Component<Props, State> {
         // We have double tap here
         setTimeout(() => {
           /**
-           * Timeout is needed to allow browser finish all events like TouchUp, etc
+           * Timeout is needed to allow browser finish all events like TouchEnd, etc
            * preventDefault is not working here
            */
           if (this.props.onNodeDoubleTap) {
