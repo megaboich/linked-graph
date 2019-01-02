@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { AppState } from "src/store";
-import * as actionCreatorsMain from "src/ui-main/actions.main";
-import * as actionCreatorsObjectEditor from "src/ui-main/object-editor/actions.object-editor";
+import { mainActionCreator } from "src/ui-main/actions.main";
+import { objectEditorActionCreator } from "src/ui-main/object-editor/actions.object-editor";
 import { MainComponent } from "./component.main";
 
 export const MainContainer = connect(
@@ -14,10 +14,10 @@ export const MainContainer = connect(
   }),
   // Map actions
   {
-    selectObject: actionCreatorsMain.selectObject,
-    addObject: actionCreatorsObjectEditor.createNewObject,
-    showObjectEditor: actionCreatorsObjectEditor.showObjectEditor,
-    loadGraph: actionCreatorsMain.loadGraph,
-    setOptions: actionCreatorsMain.setOptions
+    selectObject: mainActionCreator.selectObject,
+    addObject: objectEditorActionCreator.createNewObject,
+    showObjectEditor: objectEditorActionCreator.showObjectEditor,
+    loadGraph: mainActionCreator.loadGraph,
+    setOptions: mainActionCreator.setOptions
   }
 )(MainComponent);

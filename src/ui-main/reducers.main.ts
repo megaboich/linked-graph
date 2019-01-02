@@ -8,33 +8,29 @@ import {
   GraphModel
 } from "../data/graph-model";
 import { saveGraphToLocalStorage } from "../data/graph-local-storage";
-
-import { ActionType, getType } from "typesafe-actions";
-
-import * as actionCreators from "./actions.main";
-type Action = ActionType<typeof actionCreators>;
+import { MainAction, MainActionType } from "./actions.main";
 
 export function reducers(
   state: MainState | undefined,
-  action: Action
+  action: MainAction
 ): MainState {
   if (!state) {
     return null as any; //This effectively skips initial state because that is defined in the store initialization
   }
   switch (action.type) {
-    case getType(actionCreators.removeObject):
+    case MainActionType.REMOVE_OBJECT:
       return removeObject(state);
-    case getType(actionCreators.loadGraph):
+    case MainActionType.LOAD_GRAPH:
       return loadGraph(state, action.payload);
-    case getType(actionCreators.modifyObject):
+    case MainActionType.MODIFY_OBJECT:
       return editObject(
         state,
         action.payload.newObject,
         action.payload.newConnections
       );
-    case getType(actionCreators.selectObject):
+    case MainActionType.SELECT_OBJECT:
       return selectObject(state, action.payload);
-    case getType(actionCreators.setOptions):
+    case MainActionType.SET_OPTIONS:
       return setOptions(state, action.payload);
     default:
       return state;

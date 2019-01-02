@@ -1,26 +1,26 @@
-import { createAction } from "typesafe-actions";
+import { action, ActionType } from "typesafe-actions";
 import { GraphObject, GraphConnection } from "src/data/graph-model";
 
-/*
- * action creators
- */
+export enum ObjectEditorActionType {
+  SHOW_OBJ_EDITOR = "SHOW_OBJ_EDITOR",
+  HIDE_OBJ_EDITOR = "HIDE_OBJ_EDITOR",
+  ADD_CONNECTION = "ADD_CONNECTION",
+  REMOVE_CONNECTION = "REMOVE_CONNECTION",
+  REVERSE_CONNECTION = "REVERSE_CONNECTION"
+}
 
-export const showObjectEditor = createAction(
-  "SHOW_OBJ_EDITOR",
-  resolve => (object: GraphObject, connections: GraphConnection[]) => {
+export const objectEditorActionCreator = {
+  showObjectEditor: (object: GraphObject, connections: GraphConnection[]) => {
     const relatedConnections = connections
       .filter(x => x.source === object || x.target === object)
       .map(x => ({ ...x }));
-    return resolve({
+    return action(ObjectEditorActionType.SHOW_OBJ_EDITOR, {
       object,
       connections: relatedConnections
     });
-  }
-);
+  },
 
-export const createNewObject = createAction(
-  "SHOW_OBJ_EDITOR",
-  resolve => (selectedObject?: GraphObject) => {
+  createNewObject: (selectedObject?: GraphObject) => {
     const newObject: GraphObject = {
       id: "",
       label: "",
@@ -35,23 +35,21 @@ export const createNewObject = createAction(
         relation: "related to"
       });
     }
-    return resolve({
+    return action(ObjectEditorActionType.SHOW_OBJ_EDITOR, {
       object: newObject,
       connections
     });
-  }
-);
+  },
 
-export const hideObjectEditor = createAction("HIDE_OBJ_EDITOR");
+  hideObjectEditor: () => action(ObjectEditorActionType.HIDE_OBJ_EDITOR),
 
-export const addConnection = createAction("ADD_CONNECTION");
+  addConnection: () => action(ObjectEditorActionType.ADD_CONNECTION),
 
-export const removeConnection = createAction(
-  "REMOVE_CONNECTION",
-  resolve => (connection: Partial<GraphConnection>) => resolve(connection)
-);
+  removeConnection: (connection: Partial<GraphConnection>) =>
+    action(ObjectEditorActionType.REMOVE_CONNECTION, connection),
 
-export const reverseConnection = createAction(
-  "REVERSE_CONNECTION",
-  resolve => (connection: Partial<GraphConnection>) => resolve(connection)
-);
+  reverseConnection: (connection: Partial<GraphConnection>) =>
+    action(ObjectEditorActionType.REVERSE_CONNECTION, connection)
+};
+
+export type ObjectEditorAction = ActionType<typeof objectEditorActionCreator>;

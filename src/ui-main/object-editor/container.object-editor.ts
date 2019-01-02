@@ -1,7 +1,7 @@
 import { connect } from "react-redux";
 import { AppState } from "src/store";
-import * as mainActionCreators from "src/ui-main/actions.main";
-import * as actionCreators from "./actions.object-editor";
+import { mainActionCreator } from "src/ui-main/actions.main";
+import { objectEditorActionCreator } from "./actions.object-editor";
 import { ObjectEditorComponent } from "./component.object-editor";
 
 export const ObjectEditorComponentContainer = connect(
@@ -13,11 +13,11 @@ export const ObjectEditorComponentContainer = connect(
     allConnections: state.main.connections
   }),
   {
-    removeObject: mainActionCreators.removeObject,
-    hideObjectEditor: actionCreators.hideObjectEditor,
-    editObject: mainActionCreators.modifyObject,
-    reverseConnection: actionCreators.reverseConnection,
-    addConnection: actionCreators.addConnection,
-    removeConnection: actionCreators.removeConnection
+    editObject: mainActionCreator.modifyObject,
+    removeObject: mainActionCreator.removeObject,
+    hideObjectEditor: objectEditorActionCreator.hideObjectEditor,
+    reverseConnection: objectEditorActionCreator.reverseConnection,
+    addConnection: objectEditorActionCreator.addConnection,
+    removeConnection: objectEditorActionCreator.removeConnection
   }
 )(ObjectEditorComponent);

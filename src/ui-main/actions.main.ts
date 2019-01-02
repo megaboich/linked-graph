@@ -1,4 +1,4 @@
-import { createAction } from "typesafe-actions";
+import { action, ActionType } from "typesafe-actions";
 import {
   GraphObject,
   GraphConnection,
@@ -6,28 +6,27 @@ import {
   GraphOptions
 } from "src/data/graph-model";
 
-/*
- * action creators
- */
-export const selectObject = createAction(
-  "SELECT_OBJECT",
-  resolve => (object?: GraphObject) => resolve(object)
-);
+export enum MainActionType {
+  LOAD_GRAPH = "LOAD_GRAPH",
+  SELECT_OBJECT = "SELECT_OBJECT",
+  MODIFY_OBJECT = "MODIFY_OBJECT",
+  REMOVE_OBJECT = "REMOVE_OBJECT",
+  SET_OPTIONS = "SET_OPTIONS"
+}
 
-export const removeObject = createAction("REMOVE_OBJECT");
+export const mainActionCreator = {
+  selectObject: (object?: GraphObject) =>
+    action(MainActionType.SELECT_OBJECT, object),
 
-export const modifyObject = createAction(
-  "MODIFY_OBJECT",
-  resolve => (newObject: GraphObject, newConnections: GraphConnection[]) =>
-    resolve({ newObject, newConnections })
-);
+  removeObject: () => action(MainActionType.REMOVE_OBJECT),
 
-export const loadGraph = createAction(
-  "LOAD_GRAPH",
-  resolve => (graph: GraphModel) => resolve(graph)
-);
+  modifyObject: (newObject: GraphObject, newConnections: GraphConnection[]) =>
+    action(MainActionType.MODIFY_OBJECT, { newObject, newConnections }),
 
-export const setOptions = createAction(
-  "SET_OPTIONS",
-  resolve => (options: GraphOptions) => resolve(options)
-);
+  loadGraph: (graph: GraphModel) => action(MainActionType.LOAD_GRAPH, graph),
+
+  setOptions: (options: GraphOptions) =>
+    action(MainActionType.SET_OPTIONS, options)
+};
+
+export type MainAction = ActionType<typeof mainActionCreator>;

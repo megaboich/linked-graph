@@ -1,32 +1,31 @@
-import { AppState, ObjectEditorState } from "src/store";
+import { ObjectEditorState } from "src/store";
 import { GraphConnection, GraphObject } from "src/data/graph-model";
-
-import { ActionType, getType } from "typesafe-actions";
-
-import * as actionCreators from "./actions.object-editor";
-type Action = ActionType<typeof actionCreators>;
+import {
+  ObjectEditorAction,
+  ObjectEditorActionType
+} from "./actions.object-editor";
 
 export function reducers(
   state: ObjectEditorState | undefined,
-  action: Action
+  action: ObjectEditorAction
 ): ObjectEditorState {
   if (!state) {
     return null as any; //This effectively skips initial state because that is defined in the store initialization
   }
   switch (action.type) {
-    case getType(actionCreators.showObjectEditor):
+    case ObjectEditorActionType.SHOW_OBJ_EDITOR:
       return showObjectEditor(
         state,
         action.payload.object,
         action.payload.connections
       );
-    case getType(actionCreators.hideObjectEditor):
+    case ObjectEditorActionType.HIDE_OBJ_EDITOR:
       return hideObjectEditor(state);
-    case getType(actionCreators.addConnection):
+    case ObjectEditorActionType.ADD_CONNECTION:
       return addConnection(state);
-    case getType(actionCreators.removeConnection):
+    case ObjectEditorActionType.REMOVE_CONNECTION:
       return removeConnection(state, action.payload);
-    case getType(actionCreators.reverseConnection):
+    case ObjectEditorActionType.REVERSE_CONNECTION:
       return reverseConnection(state, action.payload);
     default:
       return state;
