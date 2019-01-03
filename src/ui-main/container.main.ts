@@ -10,7 +10,8 @@ export const MainContainer = connect(
     objects: state.main.objects,
     connections: state.main.connections,
     selectedObject: state.main.selectedObject,
-    options: state.main.options
+    options: state.main.options,
+    undoActionsCount: state.main.snapshots.length
   }),
   // Map actions
   {
@@ -18,6 +19,7 @@ export const MainContainer = connect(
     addObject: objectEditorActionCreator.createNewObject,
     showObjectEditor: objectEditorActionCreator.showObjectEditor,
     loadGraph: mainActionCreator.loadGraph,
-    setOptions: mainActionCreator.setOptions
+    setOptions: mainActionCreator.setOptions,
+    undo: mainActionCreator.undo
   }
 )(MainComponent);

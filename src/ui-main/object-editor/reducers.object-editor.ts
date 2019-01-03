@@ -1,4 +1,4 @@
-import { ObjectEditorState } from "src/store";
+import { ObjectEditorState } from "./state.object-editor";
 import { GraphConnection, GraphObject } from "src/data/graph-model";
 import {
   ObjectEditorAction,

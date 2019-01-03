@@ -11,7 +11,8 @@ export enum MainActionType {
   SELECT_OBJECT = "SELECT_OBJECT",
   MODIFY_OBJECT = "MODIFY_OBJECT",
   REMOVE_OBJECT = "REMOVE_OBJECT",
-  SET_OPTIONS = "SET_OPTIONS"
+  SET_OPTIONS = "SET_OPTIONS",
+  UNDO = "UNDO"
 }
 
 export const mainActionCreator = {
@@ -26,7 +27,9 @@ export const mainActionCreator = {
   loadGraph: (graph: GraphModel) => action(MainActionType.LOAD_GRAPH, graph),
 
   setOptions: (options: GraphOptions) =>
-    action(MainActionType.SET_OPTIONS, options)
+    action(MainActionType.SET_OPTIONS, options),
+
+  undo: () => action(MainActionType.UNDO)
 };
 
 export type MainAction = ActionType<typeof mainActionCreator>;

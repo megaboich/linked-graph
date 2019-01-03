@@ -1,6 +1,6 @@
 import { getRandomName } from "src/helpers/random";
 
-import { MainState } from "../store";
+import { MainState } from "./state.main";
 import {
   GraphObject,
   GraphConnection,
@@ -9,6 +9,7 @@ import {
 } from "../data/graph-model";
 import { saveGraphToLocalStorage } from "../data/graph-local-storage";
 import { MainAction, MainActionType } from "./actions.main";
+import { serializeGraph, deserializeGraph } from "src/data/graph-serializer";
 
 export function reducers(
   state: MainState | undefined,
@@ -32,6 +33,8 @@ export function reducers(
       return selectObject(state, action.payload);
     case MainActionType.SET_OPTIONS:
       return setOptions(state, action.payload);
+    case MainActionType.UNDO:
+      return applyLastSnapshot(state);
     default:
       return state;
   }
@@ -56,7 +59,8 @@ function removeObject(state: MainState): MainState {
       ...state,
       objects: objects,
       connections: connections,
-      selectedObject: undefined
+      selectedObject: undefined,
+      snapshots: makeSnapshot(state)
     };
     saveGraphToLocalStorage(newState);
     return newState;
@@ -69,6 +73,8 @@ function editObject(
   newObject: GraphObject,
   newConnections: GraphConnection[]
 ): MainState {
+  const snapshots = makeSnapshot(state);
+
   // delete old Object and its Connections from state
   const objects = state.objects.filter(x => x.id !== newObject.id);
   const connections = state.connections.filter(
@@ -112,7 +118,8 @@ function editObject(
     ...state,
     objects: objects,
     connections: connections,
-    selectedObject: newObject
+    selectedObject: newObject,
+    snapshots
   };
 
   saveGraphToLocalStorage(newState);
@@ -135,6 +142,33 @@ function setOptions(state: MainState, options: GraphOptions): MainState {
   };
   saveGraphToLocalStorage(newState);
   return newState;
+}
+
+function makeSnapshot(state: MainState): string[] {
+  const snapshots = [...state.snapshots];
+  const newSnapshot = serializeGraph(state);
+  snapshots.push(newSnapshot);
+  while (snapshots.length > 5) {
+    snapshots.splice(1, 1);
+  }
+  return snapshots;
+}
+
+function applyLastSnapshot(state: MainState): MainState {
+  const snapshots = [...state.snapshots];
+  const lastSnapshot = snapshots.pop();
+  if (lastSnapshot) {
+    const model = deserializeGraph(lastSnapshot);
+    const newState = {
+      ...state,
+      snapshots,
+      objects: model.objects,
+      connections: model.connections
+    };
+    saveGraphToLocalStorage(newState);
+    return newState;
+  }
+  return state;
 }
 
 function generateUniqueObjectId(existingObjects: GraphObject[]): string {

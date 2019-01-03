@@ -45,6 +45,7 @@ export class AboutComponent extends Component<Props, State> {
                 <li>Displaying link directions and text.</li>
                 <li>Zooming and panning.</li>
                 <li>Mobile friendly.</li>
+                <li>Possibility to undo 5 last operations.</li>
               </ul>
               <hr />
               <p>

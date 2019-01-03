@@ -25,12 +25,14 @@ export interface Props {
   objects: GraphObject[];
   connections: GraphConnection[];
   options: GraphOptions;
+  undoActionsCount: number;
 
   selectObject(object?: GraphObject): void;
   addObject(currentlySelected?: GraphObject): void;
   showObjectEditor(object: GraphObject, connections: GraphConnection[]): void;
   loadGraph(model: GraphModel): void;
   setOptions(options: GraphOptions): void;
+  undo(): void;
 }
 
 export interface State {
@@ -89,14 +91,20 @@ export class MainComponent extends Component<Props, State> {
     this.props.loadGraph(graph);
   };
 
+  handleUndoClick = () => {
+    this.props.undo();
+  };
+
   render() {
     return (
       <div className="main-component">
         <TopNavBarComponent
           samples={this.samples}
+          isUndoEnabled={this.props.undoActionsCount > 0}
           onAboutClick={this.handleShowAboutClick}
           onOptionsClick={this.handleShowOptionsClick}
           onLoadSampleClick={this.handleLoadSampleClick}
+          onUndoClick={this.handleUndoClick}
         />
 
         <ObjectEditorComponentContainer />
