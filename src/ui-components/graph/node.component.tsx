@@ -60,7 +60,7 @@ export class NodeComponent extends Component<Props, State> {
 
   render() {
     const node = this.props.node;
-    const text = node.label || node.id;
+    const text = node.label;
     const nodeX = Math.round(node.x);
     const nodeY = Math.round(node.y);
     return (

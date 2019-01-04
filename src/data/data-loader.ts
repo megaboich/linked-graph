@@ -30,6 +30,7 @@ function buildGraphFromData(
   const objects = points.map(s => {
     const object: GraphObject = {
       id: s,
+      label: s,
       ...getRandomCoordinates()
     };
     return object;

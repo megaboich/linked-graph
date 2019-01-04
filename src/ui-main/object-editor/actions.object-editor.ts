@@ -43,7 +43,8 @@ export const objectEditorActionCreator = {
 
   hideObjectEditor: () => action(ObjectEditorActionType.HIDE_OBJ_EDITOR),
 
-  addConnection: () => action(ObjectEditorActionType.ADD_CONNECTION),
+  addConnection: (defaultRelation: string) =>
+    action(ObjectEditorActionType.ADD_CONNECTION, defaultRelation),
 
   removeConnection: (connection: Partial<GraphConnection>) =>
     action(ObjectEditorActionType.REMOVE_CONNECTION, connection),

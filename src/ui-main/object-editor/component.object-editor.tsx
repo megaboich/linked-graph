@@ -9,6 +9,7 @@ import { ModalComponent } from "src/ui-components/modal.component";
 import { IconTrash } from "src/ui-components/icons/icon-trash";
 import { IconLoopSquare } from "src/ui-components/icons/icon-loop-square";
 import { IconPlus } from "src/ui-components/icons/icon-plus";
+import { IconWarning } from "src/ui-components/icons/icon-warning";
 
 import "./component.object-editor.less";
 
@@ -16,8 +17,8 @@ type SelectOption<T> = { value: T; label: string };
 
 interface IComponentState {
   objectName: string;
-  isNameInUse?: boolean;
-  isNameEmpty?: boolean;
+  validationIsNameInUse?: boolean;
+  validationIsNameEmpty?: boolean;
   relationOptions: SelectOption<string>[];
   objectOptions: SelectOption<GraphObject>[];
 }
@@ -32,7 +33,7 @@ interface IComponentProps {
   hideObjectEditor(): void;
   editObject(newObject: GraphObject, newConnections: GraphConnection[]): void;
   reverseConnection(connection: Partial<GraphConnection>): void;
-  addConnection(): void;
+  addConnection(defaultRelation: string): void;
   removeConnection(connection: Partial<GraphConnection>): void;
 }
 
@@ -64,13 +65,13 @@ export class ObjectEditorComponent extends Component<
         .filter(x => x.id !== newProps.object.id)
         .map(x => ({
           value: x,
-          label: x.label || x.id
+          label: x.label
         }));
 
       this.setState({
-        objectName: newObj ? newObj.label || newObj.id : "",
-        isNameEmpty: false,
-        isNameInUse: false,
+        objectName: newObj ? newObj.label : "",
+        validationIsNameEmpty: false,
+        validationIsNameInUse: false,
         relationOptions: allRelations
           .filter(x => !!x)
           .map(x => ({
@@ -88,23 +89,20 @@ export class ObjectEditorComponent extends Component<
 
   handleObjectNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newName = e.target.value;
+    this.validateObjectName(newName);
     this.setState({
       objectName: newName
     });
   };
 
   handleObjectNameBlur = () => {
-    const newName = this.state.objectName;
-    const isNameInUse = this.state.objectOptions.some(
-      x => x.label.trim().toLowerCase() === newName.trim().toLowerCase()
-    );
-    this.setState({
-      isNameEmpty: !newName.trim(),
-      isNameInUse: isNameInUse
-    });
+    this.validateObjectName(this.state.objectName);
   };
 
   handleSaveClick = () => {
+    if (!this.validateObjectName(this.state.objectName)) {
+      return;
+    }
     const newObject = { ...this.props.object };
     newObject.label = this.state.objectName;
 
@@ -124,7 +122,11 @@ export class ObjectEditorComponent extends Component<
   };
 
   handleAddConnectionClick = () => {
-    this.props.addConnection();
+    const defaultRelation =
+      this.state.relationOptions.length > 0
+        ? this.state.relationOptions[0].value
+        : "related to";
+    this.props.addConnection(defaultRelation);
   };
 
   handleReverseConnectionClick = (connection: Partial<GraphConnection>) => {
@@ -140,17 +142,31 @@ export class ObjectEditorComponent extends Component<
     this.props.hideObjectEditor();
   };
 
+  private validateObjectName(name: string): boolean {
+    const objectName = (name || "").trim();
+    const validationIsNameInUse = this.state.objectOptions.some(
+      x => x.label.trim().toLowerCase() === objectName.toLowerCase()
+    );
+    const validationIsNameEmpty = !objectName;
+    this.setState({
+      validationIsNameEmpty,
+      validationIsNameInUse
+    });
+    return !validationIsNameEmpty && !validationIsNameInUse;
+  }
+
   render(): JSX.Element {
     if (!this.props.isVisible) {
       return <div />;
     }
 
-    const hasError = this.state.isNameInUse || this.state.isNameEmpty;
+    const hasError =
+      this.state.validationIsNameInUse || this.state.validationIsNameEmpty;
     let errorText = "";
-    if (this.state.isNameInUse) {
+    if (this.state.validationIsNameInUse) {
       errorText = "This name is already in use by another object";
     }
-    if (this.state.isNameEmpty) {
+    if (this.state.validationIsNameEmpty) {
       errorText = "Object must have name specified";
     }
 
@@ -164,25 +180,27 @@ export class ObjectEditorComponent extends Component<
         onClose={this.handleCloseModal}
         body={
           <div className="object-editor-modal-body">
-            <div className="field">
+            <div className="field is-marginless">
               <label className="label">Object name</label>
               <div className="control has-icons-right">
                 <input
                   className={cn("input", { "is-danger": hasError })}
                   type="text"
                   placeholder="Name of object"
-                  autoFocus
+                  autoFocus={isAddNewObject}
                   value={this.state.objectName}
-                  onChange={this.handleObjectNameChange}
+                  onInput={this.handleObjectNameChange}
                   onBlur={this.handleObjectNameBlur}
                 />
                 {hasError && (
                   <span className="icon is-small is-right">
-                    <span className="oi" data-glyph="warning" />
+                    <IconWarning />
                   </span>
                 )}
               </div>
-              {hasError && <p className="help is-danger">{errorText}</p>}
+              <p className={cn("help", { "is-danger": !!errorText })}>
+                {errorText || <span>&nbsp;</span>}
+              </p>
             </div>
             <div className="field">
               <div className="connections-container">
@@ -341,7 +359,7 @@ export class ObjectEditorComponent extends Component<
         isValidNewOption={inputValue => {
           if (inputValue) {
             const exist = this.state.objectOptions.some(
-              x => x.label === inputValue.trim()
+              x => x.label.toLowerCase() === inputValue.trim().toLowerCase()
             );
             return !exist;
           }

@@ -22,7 +22,7 @@ export function reducers(
     case ObjectEditorActionType.HIDE_OBJ_EDITOR:
       return hideObjectEditor(state);
     case ObjectEditorActionType.ADD_CONNECTION:
-      return addConnection(state);
+      return addConnection(state, action.payload);
     case ObjectEditorActionType.REMOVE_CONNECTION:
       return removeConnection(state, action.payload);
     case ObjectEditorActionType.REVERSE_CONNECTION:
@@ -75,9 +75,13 @@ function reverseConnection(
   return state;
 }
 
-function addConnection(state: ObjectEditorState): ObjectEditorState {
+function addConnection(
+  state: ObjectEditorState,
+  defaultRelation: string
+): ObjectEditorState {
   const newConnection: Partial<GraphConnection> = {
-    source: state.object
+    source: state.object,
+    relation: defaultRelation
   };
   return {
     ...state,

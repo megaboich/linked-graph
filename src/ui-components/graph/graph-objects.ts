@@ -1,6 +1,6 @@
 export interface GraphNode {
   id: string;
-  label?: string;
+  label: string;
   x: number;
   y: number;
   width?: number;
