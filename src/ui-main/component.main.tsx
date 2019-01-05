@@ -123,8 +123,11 @@ export class MainComponent extends Component<Props, State> {
 
         <div className="graph-container">
           <GraphComponent
-            useForce={this.props.options.useForceLayout}
-            forceLinkLength={this.props.options.forceLayoutLinkLength}
+            useForce={
+              this.props.options.useForceLayout &&
+              this.props.options.forceLayoutLinkLength !== undefined
+            }
+            forceLinkLength={this.props.options.forceLayoutLinkLength || 100}
             drawLinkText={this.props.options.drawLinkText}
             drawLinkArrows={this.props.options.drawLinkArrows}
             drawRulerGrid={this.props.options.drawRulerGrid}

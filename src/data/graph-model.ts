@@ -23,7 +23,7 @@ export interface GraphOptions {
   drawLinkArrows: boolean;
   drawLinkText: boolean;
   useForceLayout: boolean;
-  forceLayoutLinkLength: number;
+  forceLayoutLinkLength?: number;
   drawRulerGrid: boolean;
 }
 

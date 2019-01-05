@@ -48,6 +48,9 @@ export class NavbarComponent extends Component<
           className={cn("navbar-menu", {
             "is-active": this.state.isMenuToggled
           })}
+          onClick={() => {
+            this.setState({ isMenuToggled: false });
+          }}
         >
           {this.props.menuContent}
         </div>

@@ -92,14 +92,16 @@ export class OptionsComponent extends Component<Props, State> {
                 disabled={!this.state.useForceLayout}
                 className="input"
                 type="number"
-                value={this.state.forceLayoutLinkLength}
+                value={
+                  this.state.forceLayoutLinkLength !== undefined
+                    ? this.state.forceLayoutLinkLength
+                    : ""
+                }
                 onChange={e => {
                   const v = parseInt(e.target.value);
-                  if (!isNaN(v)) {
-                    this.setState({
-                      forceLayoutLinkLength: v
-                    });
-                  }
+                  this.setState({
+                    forceLayoutLinkLength: isNaN(v) ? undefined : v
+                  });
                 }}
               />
             </div>
