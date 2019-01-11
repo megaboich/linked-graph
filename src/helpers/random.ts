@@ -62,7 +62,7 @@ export function getRandomWord(length: number): string {
   let result = "";
   const firstShift = getRandomNumber(0, 1);
   for (let i = 0; i < length; ++i) {
-    let letter =
+    const letter =
       (i + firstShift) % 2 == 0
         ? lettersOdd[getRandomNumber(0, lettersOdd.length - 1)]
         : lettersEven[getRandomNumber(0, lettersEven.length - 1)];

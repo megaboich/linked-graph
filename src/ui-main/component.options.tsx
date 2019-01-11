@@ -98,7 +98,7 @@ export class OptionsComponent extends Component<Props, State> {
                     : ""
                 }
                 onChange={e => {
-                  const v = parseInt(e.target.value);
+                  const v = parseInt(e.target.value, 10);
                   this.setState({
                     forceLayoutLinkLength: isNaN(v) ? undefined : v
                   });

@@ -71,8 +71,12 @@ module.exports = function(env) {
         { test: /\.(html|txt)$/, loader: "raw-loader" },
         { test: /\.css$/, use: ["style-loader", "css-loader"] },
         {
-          test: /\.(less|scss)$/,
+          test: /\.(less)$/,
           use: ["style-loader", "css-loader", "less-loader"]
+        },
+        {
+          test: /\.(scss)$/,
+          use: ["style-loader", "css-loader", "sass-loader"]
         }
       ]
     },

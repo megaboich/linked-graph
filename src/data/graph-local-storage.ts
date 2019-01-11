@@ -10,7 +10,9 @@ export function loadGraphFromLocalStorage(): GraphModel {
     try {
       const model = deserializeGraph(serialized);
       return model;
-    } catch (ex) {}
+    } catch (ex) {
+      console.error(ex);
+    }
   }
   return getSamples()[0].getGraph();
 }
