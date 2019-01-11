@@ -14,6 +14,7 @@ One of important functionalities is a *live layout* which adjusts positions of o
 ![Linked graph demo gif](docs/linked-graph-demo-optimized.gif)
               
 Used 3rd party libraries and assets:
+
 - [Webcola](https://github.com/tgdwyer/WebCola) is a JavaScript constraint-based graph layout library.
 - [React](https://reactjs.org/) is a JavaScript library for building user interfaces.
 - [Redux](https://redux.js.org/) is a predictable state container for JavaScript apps.
@@ -25,6 +26,7 @@ Used 3rd party libraries and assets:
 ### Delevopment
 This application is written in [TypeScript]() and is using [Webpack]() tool to build the application.
 You need [NodeJS](https://nodejs.org/en/) installed in your system. [Yarn](https://yarnpkg.com/en/) is optional but nice to have. Recommended IDE is [VSCode]() with these plugins: [TSLint](https://github.com/Microsoft/vscode-typescript-tslint-plugin), [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode).
+
 - Install packages: `npm i` or `yarn`
 - Run development server: `npm start` or `yarn start`
 - Build release version: `npm run build` or `yarn build`
