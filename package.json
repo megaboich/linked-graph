@@ -8,7 +8,8 @@
   "scripts": {
     "build": "webpack --env prod",
     "start": "webpack-dev-server",
-    "tslint": "tslint --project . --format verbose --fix"
+    "tslint": "tslint --project . --format verbose --fix",
+    "deploy": "yarn build && gh-pages -d dist --repo https://github.com/megaboich/linked-graph.git --branch gh-pages"
   },
   "dependencies": {
     "bulma": "0.7.2",
