@@ -12,6 +12,8 @@ One of important functionalities is a *live layout* which adjusts positions of o
 - Mobile friendly.
 
 ![Linked graph demo gif](docs/linked-graph-demo-optimized.gif)
+
+**Live demo** is deployed here: [https://megaboich.github.io/linked-graph](https://megaboich.github.io/linked-graph).
               
 Used 3rd party libraries and assets:
 
